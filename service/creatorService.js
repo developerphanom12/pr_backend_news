@@ -2,6 +2,10 @@ const db = require('../database/database')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
+const dotenv = require('dotenv')
+
+
+dotenv.config();
 
 function registerCreator(creatorData) {
     return new Promise((resolve, reject) => {
@@ -73,7 +77,7 @@ function logincreator(email, password, callback) {
             return callback(null, { error: 'Invalid password' });
         }
 
-        const secretKey = 'secretkey';
+        const secretKey = process.env.JWT_SECRET;
         const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, secretKey);
 
         return callback(null, {
