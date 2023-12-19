@@ -60,8 +60,25 @@ const validatecomment = (req, res, next) => {
   next();
 };
 
+const creatorlogin = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().required()
+});
+
+const validateLogin = (req, res, next) => {
+  const { error } = creatorlogin.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+
+  next();
+};
+
   module.exports ={
     VALIDATECREATOR,
     validateUser,
-    validatecomment
+    validatecomment,
+    validateLogin
   }

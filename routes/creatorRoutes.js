@@ -2,13 +2,13 @@
 const  express = require('express')
 const router = express.Router();
 const creatorCOntroller = require('../controller/creatorController');
-const { VALIDATECREATOR, validatecomment } = require('../middleware/validation');
+const { VALIDATECREATOR, validatecomment, validateLogin } = require('../middleware/validation');
 const { upload } = require('../multer/multer');
 const authenticateToken = require('../auth/token');
 
 router.post('/registercreator',upload.single('image'), VALIDATECREATOR,creatorCOntroller.registerCreatorHandler) 
 
-router.post('/logincreator',creatorCOntroller.creatorlogin) 
+router.post('/logincreator',validateLogin,creatorCOntroller.creatorlogin) 
 
 
 router.get('/getallpost' ,authenticateToken, creatorCOntroller.getallpost)

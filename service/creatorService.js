@@ -192,28 +192,24 @@ const checkUserExists = (userId) => {
       });
     });
   }
-  async function getTotalPostCount() {
-    const countQuery = 'SELECT COUNT(*) AS totalCount FROM post_table;';
-    
-    try {
-      const results = await new Promise((resolve, reject) => {
-        db.query(countQuery, (error, results) => {
-          if (error) {
-            console.error('Error executing count query:', error);
-            reject(error);
-          } else {
-            resolve(results);
-          }
-        });
-      });
   
-      const totalCount = results[0].totalCount;
-      return totalCount;
-    } catch (error) {
-      throw error;
-    }
+  function getTotalPostCount() {
+    return new Promise((resolve, reject) => {
+      const countQuery = 'SELECT COUNT(*) AS totalCount FROM post_table;';
+  
+      db.query(countQuery, (error, results) => {
+        if (error) {
+          console.error('Error executing count query:', error);
+          reject(error);
+        } else {
+          const totalCount = results[0].totalCount;
+          resolve(totalCount);
+        }
+      });
+    });
   }
   
+
 const updatestatus = (is_approved,userId,callback) => {
     const updateQuery = 'UPDATE creator_users_data SET is_approved	 = ? WHERE id = ?';
   
