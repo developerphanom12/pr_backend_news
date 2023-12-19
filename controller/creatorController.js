@@ -1,7 +1,7 @@
-const { YourSpecificError } = require('../message/error');
+const { YourSpecificError } = require('../error/error');
 const creatorService = require('../service/creatorService')
 const bcrypt = require('bcrypt')
-const emailservice = require('../sendingemail/aproovemail');
+const emailservice = require('../template/sendingemail');
 const { exist } = require('joi');
 
 
@@ -149,7 +149,7 @@ const aprooveCreator = async (req, res) => {
       };
     }
 
-    creatorService.updateCreator(is_approved, userId, (error, result) => {
+    creatorService.updatestatus(is_approved, userId, (error, result) => {
       if (error) {
         console.error('Error updating Creator status:', error);
         throw {
@@ -186,38 +186,51 @@ const aprooveCreator = async (req, res) => {
 
 const getallpost = async (req, res) => {
   try {
+    const { page = 1, pageSize = 10 } = req.query; 
+
+    const offset = (page - 1) * pageSize;
 
     let userApplications;
 
-    userApplications = await creatorService.getallpost();
+    userApplications = await creatorService.getallpost(offset, pageSize);
+
+    const totalCount = await creatorService.getTotalPostCount();
+
+    const totalPages = Math.ceil(totalCount / pageSize);
 
     if (userApplications.length > 0) {
       res.status(200).json({
-        message: "posts courses fetched successfully",
+        message: "Posts fetched successfully",
         status: 200,
         data: {
-          posts: userApplications
-        }
+          posts: userApplications, 
+          pagination: {
+            page: parseInt(page),
+            pageSize: parseInt(pageSize),
+            totalItems: totalCount, 
+            totalPages,
+          },
+        },
       });
     } else {
-      const responseMessage = 'No posts not found.';
+      const responseMessage = 'No posts found.';
       res.status(404).json({
         message: responseMessage,
-        status: 404
+        status: 404,
       });
     }
   } catch (error) {
     if (error instanceof YourSpecificError) {
       return res.status(400).json({
         status: 400,
-        error: 'An error occurred while processing your request.'
+        error: 'An error occurred while processing your request.',
       });
     }
 
     if (error.name === 'UnauthorizedError') {
       return res.status(401).json({
         status: 401,
-        error: 'Unauthorized access'
+        error: 'Unauthorized access',
       });
     }
 
@@ -225,7 +238,7 @@ const getallpost = async (req, res) => {
 
     res.status(500).json({
       status: 500,
-      error: 'An unexpected error occurred. Please try again later.'
+      error: 'An unexpected error occurred. Please try again later.',
     });
   }
 };
@@ -257,7 +270,7 @@ const comment = async (req, res) => {
 
     const { post_id, comment } = req.body;
 
-    const commentData = await creatorService.Comment({
+    const commentData = await creatorService.commentadd({
       post_id,
       user_id: userId,
       comment,
@@ -321,7 +334,7 @@ const likePost = async (req, res) => {
     const commentData = await creatorService.Comment({
       post_id,
       user_id: userId,
-      
+
     });
 
     res.status(201).json({

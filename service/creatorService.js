@@ -96,7 +96,147 @@ function logincreator(email, password, callback) {
 }
 
 
+function commentadd(commentAdd) {
+    return new Promise((resolve, reject) => {
+        const insertSql = `INSERT INTO comment_table(post_id,user_id,comment) 
+                           VALUES (?,?,?)`;
+
+        const values = [
+            commentAdd.post_id,
+            commentAdd.user_id,
+            commentAdd.comment
+        ];
+
+        db.query(insertSql, values, (error, result) => {
+            if (error) {
+                console.error('Error adding admin:', error);
+                reject(error);
+            } else {
+                const adminId = result.insertId;
+
+                if (adminId > 0) {
+                    const successMessage = 'add comment successful';
+                    resolve(successMessage);
+                } else {
+                    const errorMessage = 'add  comment failed';
+                    reject(errorMessage);
+                }
+            }
+        });
+    });
+}
+
+const checkUserExists = (userId) => {
+    return new Promise((resolve, reject) => {
+      const checkUserSql = 'SELECT * FROM user_register WHERE id = ?';
+  
+      db.query(checkUserSql, [userId], (error, result) => {
+        if (error) {
+          console.error('Error checking user existence:', error);
+          reject(error);
+        } else {
+            
+          resolve(result.length > 0);
+        }
+      });
+    });
+  };
+
+
+
+  function getallpost(offset, pageSize) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT
+        c.id,
+          c.creator_id,
+          c.media,
+          c.title,
+          c.descriptions,
+          u.id AS category_id,
+          u.title,
+          cu.creator_name
+        FROM post_table c
+        INNER JOIN category u ON c.category_id = u.id
+        LEFT JOIN  creator_users_data cu ON c.creator_id = cu.id
+        LIMIT ?, ?;`;
+  
+        db.query(query, [offset, parseInt(pageSize, 10)], (error, results) => {
+            if (error) {
+          console.error('Error executing query:', error);
+          reject(error);
+        } else {
+          const posts = results.map((row) => ({
+            id:row.id,
+            creator: {
+              creator_id: row.creator_id,
+              creator_name: row.creator_name,
+            },
+            media: row.media,
+            title: row.title,
+            descriptions: row.descriptions,
+            category: {
+              id: row.category_id,
+              title: row.title,
+            },
+            is_active: row.is_active,
+            create_date: row.create_date,
+            update_date: row.update_date,
+            is_deleted: row.is_deleted,
+          }));
+  
+          resolve(posts);
+  
+          console.log('Posts retrieved successfully');
+        }
+      });
+    });
+  }
+  async function getTotalPostCount() {
+    const countQuery = 'SELECT COUNT(*) AS totalCount FROM post_table;';
+    
+    try {
+      const results = await new Promise((resolve, reject) => {
+        db.query(countQuery, (error, results) => {
+          if (error) {
+            console.error('Error executing count query:', error);
+            reject(error);
+          } else {
+            resolve(results);
+          }
+        });
+      });
+  
+      const totalCount = results[0].totalCount;
+      return totalCount;
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+const updatestatus = (is_approved,userId,callback) => {
+    const updateQuery = 'UPDATE creator_users_data SET is_approved	 = ? WHERE id = ?';
+  
+    db.query(updateQuery, [is_approved	,userId], (error, result) => {
+      if (error) {
+        console.error('Error updating application status:', error);
+        return callback(error, null);
+      }
+  
+      if (result.affectedRows === 0) {
+        return callback(null, { error: 'creator not found' });
+      }
+  
+      return callback(null, { message: 'creator status updated successfully' });
+    });
+  };
+
 module.exports = {
     registerCreator,
-    logincreator
+    logincreator,
+    checkUserExists,
+    getallpost,
+    updatestatus,
+    commentadd,
+    getTotalPostCount
 }
