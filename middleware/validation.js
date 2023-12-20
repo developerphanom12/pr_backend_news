@@ -94,10 +94,26 @@ const Validatelike = (req, res, next) => {
   next();
 };
 
+const addfollower = Joi.object({
+  creator_id: Joi.number().required(),
+});
+
+const Validatefollower = (req, res, next) => {
+  const { error } = addfollower.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+
+  next();
+};
+
   module.exports ={
     VALIDATECREATOR,
     validateUser,
     validatecomment,
     validateLogin,
-    Validatelike
+    Validatelike,
+    Validatefollower
   }

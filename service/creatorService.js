@@ -27,7 +27,7 @@ function registerCreator(creatorData) {
 
     db.query(insertSql, values, (error, result) => {
       if (error) {
-        console.error('Error adding admin:', error);
+        console.error('Error adding creator:', error);
         reject(error);
       } else {
         const adminId = result.insertId;
@@ -109,7 +109,7 @@ function commentadd(commentAdd) {
 
     db.query(insertSql, values, (error, result) => {
       if (error) {
-        console.error('Error adding admin:', error);
+        console.error('Error adding comment:', error);
         reject(error);
       } else {
         const adminId = result.insertId;
@@ -142,33 +142,6 @@ const checkUserExists = (userId) => {
   });
 };
 
-
-
-// async function getUserApplicationByPhoneNumber11(userId, application) {
-//   const query = `
-//     SELECT
-//       a.application_id,
-//       a.student_firstname,
-//       a.student_passport_no,
-//       a.application_status,
-//       a.student_whatsapp_number,
-//       a.created_at,
-//       u.id AS user_id,
-//       u.username,
-//       u.phone_number,
-//       au.university_id AS university_id,
-//       au.university_name,
-//       au.person_name,
-//       au.contact_number,
-//       c.course_id AS course_id,
-//       c.course_name,
-//       c.course_level
-//     FROM applications_table a
-//     INNER JOIN user01 u ON a.user_id = u.id
-//     LEFT JOIN university au ON a.university_id = au.university_id
-//     LEFT JOIN courses c ON a.course_id = c.course_id
-//     WHERE u.id = ? 
-//       AND a.application_status = ?;`;
 
 function searchKeyPost(postTitle) {
   return new Promise((resolve, reject) => {
@@ -292,7 +265,7 @@ const updatestatus = (is_approved, userId, callback) => {
 
   db.query(updateQuery, [is_approved, userId], (error, result) => {
     if (error) {
-      console.error('Error updating application status:', error);
+      console.error('Error while update creator status:', error);
       return callback(error, null);
     }
 
@@ -320,7 +293,7 @@ function likeadd(likeAdd) {
 
     db.query(insertSql, values, (error, result) => {
       if (error) {
-        console.error('Error adding admin:', error);
+        console.error('Error adding likes:', error);
         reject(error);
       } else {
         const adminId = result.insertId;
@@ -356,11 +329,11 @@ function getallcommentbypostid(postid) {
         console.error('Error executing query:', error);
         reject(error);
       } else {
-        const comments = results.map((row) => ({ 
+        const comments = results.map((row) => ({
           id: row.id,
           post_id: row.post_id,
           comment: row.comment,
-          updated_at:row.updated_at,
+          updated_at: row.updated_at,
           user: {
             id: row.user_id,
             name: row.name,
@@ -377,6 +350,68 @@ function getallcommentbypostid(postid) {
 
 
 
+function Addfoloowr(addFollower) {
+  return new Promise((resolve, reject) => {
+    const insertSql = `INSERT INTO follower_table(creator_id,user_id) 
+                           VALUES (?,?)`;
+
+    const values = [
+      addFollower.creator_id,
+      addFollower.user_id,
+    ];
+
+    db.query(insertSql, values, (error, result) => {
+      if (error) {
+        console.error('Error adding follower:', error);
+        reject(error);
+      } else {
+        const adminId = result.insertId;
+
+        if (adminId > 0) {
+          const successMessage = 'add follower successful';
+          resolve(successMessage);
+        } else {
+          const errorMessage = 'add  follower failed';
+          reject(errorMessage);
+        }
+      }
+    });
+  });
+}
+
+
+function getallFollowr(creatorId) {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT
+          c.id,
+          c.creator_id,
+          a.id AS user_id,
+          a.name
+          FROM follower_table c
+      LEFT JOIN user_register a ON c.user_id = a.id
+      WHERE c.creator_id = ?;`;
+
+    db.query(query, [creatorId], (error, results) => {
+      if (error) {
+        console.error('Error executing query:', error);
+        reject(error);
+      } else {
+        const follower = results.map((row) => ({
+          creator_id: row.creator_id,
+          user: {
+            id: row.user_id,
+            name: row.name,
+          },
+        }));
+
+        resolve(follower);
+
+        console.log('All follower retrieved successfully');
+      }
+    });
+  });
+}
 module.exports = {
   registerCreator,
   logincreator,
@@ -387,5 +422,7 @@ module.exports = {
   getTotalPostCount,
   likeadd,
   getallcommentbypostid,
-  searchKeyPost
+  searchKeyPost,
+  Addfoloowr,
+  getallFollowr
 }

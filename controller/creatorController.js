@@ -378,7 +378,7 @@ const getcommentbyPostid = async (req, res) => {
     console.log('sdfsdfsdf', postid);
 
 
-    if (postid) {
+    if (!postid) {
       return res.status(400).json({
         message: "please provide postid",
         status: 400
@@ -427,6 +427,119 @@ const getcommentbyPostid = async (req, res) => {
 };
 
 
+const addFollower = async (req, res) => {
+  const role = req.user.role;
+  console.log("role", role);
+  const userId = req.user.id;
+  console.log('userid', userId);
+
+  try {
+    // const userExists = await creatorService.checkUserExists(userId);
+
+    // if (!userExists) {
+    //   return res.status(404).json({
+    //     status: 404,
+    //     error: 'User ID not found in user_register table',
+    //   });
+    // }
+
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        status: 403,
+        error: 'Forbidden for regular users',
+      });
+    }
+
+    const { creator_id} = req.body;
+
+    const commentData = await creatorService.Addfoloowr({
+      creator_id,
+      user_id: userId,
+    });
+
+    res.status(201).json({
+      message: commentData,
+      status: 201,
+    });
+  } catch (error) {
+    if (error instanceof YourSpecificError) {
+      return res.status(400).json({
+        status: 400,
+        error: 'An error occurred while processing your request.'
+      });
+    }
+
+    if (error.name === 'UnauthorizedError') {
+      return res.status(401).json({
+        status: 401,
+        error: 'Unauthorized access'
+      });
+    }
+
+    console.error('Internal Server Error:', error);
+
+    res.status(500).json({
+      status: 500,
+      error: 'An unexpected error occurred. Please try again later.'
+    });
+  }
+};
+
+
+const getFolloewer = async (req, res) => {
+  try {
+    const creatorId = req.params.id;
+    console.log('sdfsdfsdf', creatorId);
+
+
+    if (!creatorId) {
+      return res.status(400).json({
+        message: "please provide postid",
+        status: 400
+      })
+    }
+    let getFollowers;
+    
+    getFollowers = await creatorService.getallFollowr(creatorId);
+
+    if (getFollowers.length > 0) {
+      res.status(201).json({
+        message: "followers fetched successfully",
+        status: 201,
+        data: {
+          followers: getFollowers
+        }
+      });
+    } else {
+      const responseMessage = 'No datafound for the provided ID.';
+      res.status(404).json({
+        message: responseMessage,
+        status: 404
+      });
+    }
+  } catch (error) {
+    if (error instanceof YourSpecificError) {
+      return res.status(400).json({
+        status: 400,
+        error: 'An error occurred while processing your request.'
+      });
+    }
+
+    if (error.name === 'UnauthorizedError') {
+      return res.status(401).json({
+        status: 401,
+        error: 'Unauthorized access'
+      });
+    }
+
+    console.error('Internal Server Error:', error);
+
+    res.status(500).json({
+      status: 500,
+      error: 'An unexpected error occurred. Please try again later.'
+    });
+  }
+};
 
 module.exports = {
   registerCreatorHandler,
@@ -436,5 +549,7 @@ module.exports = {
   getallpost,
   comment,
   likePost,
-  getcommentbyPostid
+  getcommentbyPostid,
+  addFollower,
+  getFolloewer
 }
