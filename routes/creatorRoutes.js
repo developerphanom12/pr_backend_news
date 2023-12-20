@@ -2,7 +2,7 @@
 const  express = require('express')
 const router = express.Router();
 const creatorCOntroller = require('../controller/creatorController');
-const { VALIDATECREATOR, validatecomment, validateLogin } = require('../middleware/validation');
+const { VALIDATECREATOR, validatecomment, validateLogin, Validatelike } = require('../middleware/validation');
 const { upload } = require('../multer/multer');
 const authenticateToken = require('../auth/token');
 
@@ -17,5 +17,8 @@ router.post('/aproove' , authenticateToken, creatorCOntroller.aprooveCreator)
 
 router.post('/commentadd' ,validatecomment, authenticateToken, creatorCOntroller.comment)
 
+router.post('/likeadd',Validatelike, authenticateToken, creatorCOntroller.likePost)
+
+router.get('/comment/:id',authenticateToken, creatorCOntroller.getcommentbyPostid)
 
 module.exports = router;

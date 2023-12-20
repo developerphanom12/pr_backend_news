@@ -76,9 +76,28 @@ const validateLogin = (req, res, next) => {
   next();
 };
 
+
+
+const addlike = Joi.object({
+  post_id: Joi.number().required(),
+  user_id : Joi.number().required()
+});
+
+const Validatelike = (req, res, next) => {
+  const { error } = addlike.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+
+  next();
+};
+
   module.exports ={
     VALIDATECREATOR,
     validateUser,
     validatecomment,
-    validateLogin
+    validateLogin,
+    Validatelike
   }

@@ -185,29 +185,44 @@ const aprooveCreator = async (req, res) => {
 };
 
 const getallpost = async (req, res) => {
+  const { postTitle } = req.query;
   try {
-    const { page = 1, pageSize = 10 } = req.query; 
-
+    const { page = 1, pageSize = 10 } = req.query;
     const offset = (page - 1) * pageSize;
+    let getallPosts;
 
-    let userApplications;
+    if (postTitle) {
+      getallPosts = await creatorService.searchKeyPost(postTitle);
 
-    userApplications = await creatorService.getallpost(offset, pageSize);
+      if (getallPosts.length === 0) {
+        return res.status(404).json({
+          message: `No posts found with applicationStatus '${postTitle}'.`,
+          status: 404,
+        });
+      }
+    } else {
+      getallPosts = await creatorService.getallpost(offset, pageSize);
+      if (getallPosts.length === 0) {
+        return res.status(404).json({
+          message: 'No posts found.',
+          status: 404,
+        });
+      }
+    }
 
     const totalCount = await creatorService.getTotalPostCount();
-
     const totalPages = Math.ceil(totalCount / pageSize);
 
-    if (userApplications.length > 0) {
+    if (getallPosts.length > 0) {
       res.status(200).json({
         message: "Posts fetched successfully",
         status: 200,
         data: {
-          posts: userApplications, 
+          posts: getallPosts,
           pagination: {
             page: parseInt(page),
             pageSize: parseInt(pageSize),
-            totalItems: totalCount, 
+            totalItems: totalCount,
             totalPages,
           },
         },
@@ -221,30 +236,19 @@ const getallpost = async (req, res) => {
     }
   } catch (error) {
     if (error instanceof YourSpecificError) {
-      return res.status(400).json({
-        status: 400,
-        error: 'An error occurred while processing your request.',
-      });
+      return res.status(400).json({ error: 'An error occurred while processing your request.' });
     }
 
     if (error.name === 'UnauthorizedError') {
-      return res.status(401).json({
-        status: 401,
-        error: 'Unauthorized access',
-      });
+      return res.status(401).json({ error: 'Unauthorized access' });
     }
 
     console.error('Internal Server Error:', error);
 
-    res.status(500).json({
-      status: 500,
-      error: 'An unexpected error occurred. Please try again later.',
-    });
+    res.status(500).json({ error: 'An unexpected error occurred. Please try again later.' });
   }
 };
-
-
-
+// 
 const comment = async (req, res) => {
   const role = req.user.role;
   console.log("role", role);
@@ -313,7 +317,7 @@ const likePost = async (req, res) => {
   console.log('userid', userId);
 
   try {
-    const userExists = await creatorService.likespost(userId);
+    const userExists = await creatorService.checkUserExists(userId);
 
     if (!userExists) {
       return res.status(404).json({
@@ -331,7 +335,7 @@ const likePost = async (req, res) => {
 
     const { post_id } = req.body;
 
-    const commentData = await creatorService.Comment({
+    const commentData = await creatorService.likeadd({
       post_id,
       user_id: userId,
 
@@ -366,6 +370,64 @@ const likePost = async (req, res) => {
 };
 
 
+
+
+const getcommentbyPostid = async (req, res) => {
+  try {
+    const postid = req.params.id;
+    console.log('sdfsdfsdf', postid);
+
+
+    if (postid) {
+      return res.status(400).json({
+        message: "please provide postid",
+        status: 400
+      })
+    }
+    let comments;
+    comments = await creatorService.getallcommentbypostid(postid);
+
+    if (comments.length > 0) {
+      res.status(201).json({
+        message: "Courses fetched successfully",
+        status: 201,
+        data: {
+          commentData: comments
+        }
+      });
+    } else {
+      const responseMessage = 'No datafound for the provided ID.';
+      res.status(404).json({
+        message: responseMessage,
+        status: 404
+      });
+    }
+  } catch (error) {
+    if (error instanceof YourSpecificError) {
+      return res.status(400).json({
+        status: 400,
+        error: 'An error occurred while processing your request.'
+      });
+    }
+
+    if (error.name === 'UnauthorizedError') {
+      return res.status(401).json({
+        status: 401,
+        error: 'Unauthorized access'
+      });
+    }
+
+    console.error('Internal Server Error:', error);
+
+    res.status(500).json({
+      status: 500,
+      error: 'An unexpected error occurred. Please try again later.'
+    });
+  }
+};
+
+
+
 module.exports = {
   registerCreatorHandler,
   creatorlogin,
@@ -373,5 +435,6 @@ module.exports = {
   aprooveCreator,
   getallpost,
   comment,
-  likePost
+  likePost,
+  getcommentbyPostid
 }
