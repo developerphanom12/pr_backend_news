@@ -185,7 +185,16 @@ const aprooveCreator = async (req, res) => {
 };
 
 const getallpost = async (req, res) => {
+
   const { postTitle } = req.query;
+
+  if (req.user.role !== 'user') {
+    return res.status(403).json({
+      status: 403,
+      error: 'Forbidden for admin and creator only users can see this',
+    });
+  }
+
   try {
     const { page = 1, pageSize = 10 } = req.query;
     const offset = (page - 1) * pageSize;
@@ -268,7 +277,7 @@ const comment = async (req, res) => {
     if (req.user.role !== 'user') {
       return res.status(403).json({
         status: 403,
-        error: 'Forbidden for regular users',
+        error: 'Forbidden for admin and creator only users can see this',
       });
     }
 
@@ -329,7 +338,7 @@ const likePost = async (req, res) => {
     if (req.user.role !== 'user') {
       return res.status(403).json({
         status: 403,
-        error: 'Forbidden for regular users',
+        error: 'Forbidden for admin and creator only users can see this',
       });
     }
 
@@ -446,7 +455,7 @@ const addFollower = async (req, res) => {
     if (req.user.role !== 'user') {
       return res.status(403).json({
         status: 403,
-        error: 'Forbidden for regular users',
+        error: 'Forbidden for admin and creator only users can see this',
       });
     }
 
@@ -552,7 +561,7 @@ const removeFollower = async (req, res) => {
     if (req.user.role !== 'user') {
       return res.status(403).json({
         status: 403,
-        error: 'Forbidden for regular users',
+        error: 'Forbidden for admin and creator only users can see this',
       });
     }
 
@@ -600,6 +609,63 @@ const removeFollower = async (req, res) => {
 
 
 
+const removelike = async (req, res) => {
+  const role = req.user.role;
+  console.log("role", role);
+  const userId = req.user.id;
+  console.log('userid', userId);
+
+  try {
+    if (req.user.role !== 'user') {
+      return res.status(403).json({
+        status: 403,
+        error: 'Forbidden for admin and creator only users can see this ',
+      });
+    }
+
+    const { post_id } = req.body;
+
+    const removedFollower = await creatorService.RemoveLIke({
+      post_id,
+      user_id: userId,
+    });
+
+    if (removedFollower) {
+      res.status(200).json({
+        message: 'Like Remove  successful',
+        status: 200,
+      });
+    } else {
+      res.status(404).json({
+        status: 404,
+        error: 'User not found',
+      });
+    }
+  } catch (error) {
+    if (error instanceof YourSpecificError) {
+      return res.status(400).json({
+        status: 400,
+        error: 'An error occurred while processing your request.'
+      });
+    }
+
+    if (error.name === 'UnauthorizedError') {
+      return res.status(401).json({
+        status: 401,
+        error: 'Unauthorized access'
+      });
+    }
+
+    console.error('Internal Server Error:', error);
+
+    res.status(500).json({
+      status: 500,
+      error: 'An unexpected error occurred. Please try again later.'
+    });
+  }
+};
+
+
 module.exports = {
   registerCreatorHandler,
   creatorlogin,
@@ -611,5 +677,6 @@ module.exports = {
   getcommentbyPostid,
   addFollower,
   getFolloewer,
-  removeFollower
+  removeFollower,
+  removelike
 }

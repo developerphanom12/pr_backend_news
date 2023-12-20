@@ -437,6 +437,33 @@ function RemoveFollower(removeFollower) {
   });
 }
 
+
+function RemoveLIke(removeLike) {
+  return new Promise((resolve, reject) => {
+    const deleteSql = `DELETE FROM likes_table
+                       WHERE post_id = ? AND user_id = ?`;
+
+    const values = [
+      removeLike.creator_id,
+      removeLike.user_id,
+    ];
+
+    db.query(deleteSql, values, (error, result) => {
+      if (error) {
+        console.error('Error removing likes:', error);
+        reject(error);
+      } else {
+        if (result.affectedRows > 0) {
+          resolve(true); 
+        } else {
+          resolve(false); 
+        }
+      }
+    });
+  });
+}
+
+
 module.exports = {
   registerCreator,
   logincreator,
@@ -450,5 +477,6 @@ module.exports = {
   searchKeyPost,
   Addfoloowr,
   getallFollowr,
-  RemoveFollower
+  RemoveFollower,
+  RemoveLIke
 }
