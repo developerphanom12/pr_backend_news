@@ -138,7 +138,7 @@ const aprooveCreator = async (req, res) => {
     if (req.user.role !== 'admin') {
       throw {
         status: 403,
-        error: 'Forbidden. Only admin can approve or reject applications.'
+        error: 'Forbidden. Only admin can approve or reject creator.'
       };
     }
 
@@ -443,7 +443,7 @@ const addFollower = async (req, res) => {
     //   });
     // }
 
-    if (req.user.role !== 'admin') {
+    if (req.user.role !== 'user') {
       return res.status(403).json({
         status: 403,
         error: 'Forbidden for regular users',
@@ -488,18 +488,18 @@ const addFollower = async (req, res) => {
 
 const getFolloewer = async (req, res) => {
   try {
-    const creatorId = req.params.id;
+    const creatorId = req.user.id;
     console.log('sdfsdfsdf', creatorId);
 
 
     if (!creatorId) {
       return res.status(400).json({
-        message: "please provide postid",
+        message: "please provide creatorId",
         status: 400
       })
     }
     let getFollowers;
-    
+
     getFollowers = await creatorService.getallFollowr(creatorId);
 
     if (getFollowers.length > 0) {
@@ -541,6 +541,65 @@ const getFolloewer = async (req, res) => {
   }
 };
 
+
+const removeFollower = async (req, res) => {
+  const role = req.user.role;
+  console.log("role", role);
+  const userId = req.user.id;
+  console.log('userid', userId);
+
+  try {
+    if (req.user.role !== 'user') {
+      return res.status(403).json({
+        status: 403,
+        error: 'Forbidden for regular users',
+      });
+    }
+
+    const { creator_id } = req.body;
+
+    const removedFollower = await creatorService.RemoveFollower({
+      creator_id,
+      user_id: userId,
+    });
+
+    if (removedFollower) {
+      res.status(200).json({
+        message: 'Unfollow successful',
+        status: 200,
+      });
+    } else {
+      res.status(404).json({
+        status: 404,
+        error: 'Follower not found',
+      });
+    }
+  } catch (error) {
+    if (error instanceof YourSpecificError) {
+      return res.status(400).json({
+        status: 400,
+        error: 'An error occurred while processing your request.'
+      });
+    }
+
+    if (error.name === 'UnauthorizedError') {
+      return res.status(401).json({
+        status: 401,
+        error: 'Unauthorized access'
+      });
+    }
+
+    console.error('Internal Server Error:', error);
+
+    res.status(500).json({
+      status: 500,
+      error: 'An unexpected error occurred. Please try again later.'
+    });
+  }
+};
+
+
+
 module.exports = {
   registerCreatorHandler,
   creatorlogin,
@@ -551,5 +610,6 @@ module.exports = {
   likePost,
   getcommentbyPostid,
   addFollower,
-  getFolloewer
+  getFolloewer,
+  removeFollower
 }

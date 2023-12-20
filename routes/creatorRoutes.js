@@ -2,7 +2,7 @@
 const  express = require('express')
 const router = express.Router();
 const creatorCOntroller = require('../controller/creatorController');
-const { VALIDATECREATOR, validatecomment, validateLogin, Validatelike, Validatefollower } = require('../middleware/validation');
+const { VALIDATECREATOR, validatecomment, validateLogin, Validatelike, Validatefollower, validateUnfollow } = require('../middleware/validation');
 const { upload } = require('../multer/multer');
 const authenticateToken = require('../auth/token');
 
@@ -24,6 +24,8 @@ router.get('/comment/:id',authenticateToken, creatorCOntroller.getcommentbyPosti
 
 router.post('/addfollower',Validatefollower, authenticateToken, creatorCOntroller.addFollower)
 
-router.get('/checkfollower/:id',authenticateToken, creatorCOntroller.getFolloewer)
+router.get('/checkfollower',authenticateToken, creatorCOntroller.getFolloewer)
+
+router.put('/unfollow',validateUnfollow,authenticateToken, creatorCOntroller.removeFollower)
 
 module.exports = router;

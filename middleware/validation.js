@@ -109,11 +109,29 @@ const Validatefollower = (req, res, next) => {
   next();
 };
 
+
+
+const unfollow = Joi.object({
+  creator_id: Joi.number().required(),
+});
+
+const validateUnfollow = (req, res, next) => {
+  const { error } = unfollow.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+
+  next();
+};
+
   module.exports ={
     VALIDATECREATOR,
     validateUser,
     validatecomment,
     validateLogin,
     Validatelike,
-    Validatefollower
+    Validatefollower,
+    validateUnfollow
   }

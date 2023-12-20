@@ -378,8 +378,6 @@ function Addfoloowr(addFollower) {
     });
   });
 }
-
-
 function getallFollowr(creatorId) {
   return new Promise((resolve, reject) => {
     const query = `
@@ -412,6 +410,33 @@ function getallFollowr(creatorId) {
     });
   });
 }
+
+
+function RemoveFollower(removeFollower) {
+  return new Promise((resolve, reject) => {
+    const deleteSql = `DELETE FROM follower_table
+                       WHERE creator_id = ? AND user_id = ?`;
+
+    const values = [
+      removeFollower.creator_id,
+      removeFollower.user_id,
+    ];
+
+    db.query(deleteSql, values, (error, result) => {
+      if (error) {
+        console.error('Error removing follower:', error);
+        reject(error);
+      } else {
+        if (result.affectedRows > 0) {
+          resolve(true); 
+        } else {
+          resolve(false); 
+        }
+      }
+    });
+  });
+}
+
 module.exports = {
   registerCreator,
   logincreator,
@@ -424,5 +449,6 @@ module.exports = {
   getallcommentbypostid,
   searchKeyPost,
   Addfoloowr,
-  getallFollowr
+  getallFollowr,
+  RemoveFollower
 }
