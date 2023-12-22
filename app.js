@@ -13,13 +13,13 @@ app.use(express.json());
 app.use(cors({ origin: true })); 
 
 
-const port = process.env.PORT || 3700;
+const port = process.env.PORT || 3800;
 const ipAddress = '127.0.0.1';
 
 
 app.use('/api/admin', Admin)
 app.use('/api/creator', creator)
-app.use('/api/user', user)
+app.use('/api/user', user) 
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

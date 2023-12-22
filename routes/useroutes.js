@@ -5,7 +5,7 @@ const { validateUser } = require('../middleware/validation');
 const { upload } = require('../multer/multer');
 const authenticateToken = require('../auth/token');
 
-router.post('/register',upload.single('image'), validateUser, userCreator.userRegister)
+router.post('/register',upload.single('image'), userCreator.userRegister)
 
 
 router.post('/help',authenticateToken, userCreator.helpcontroller)

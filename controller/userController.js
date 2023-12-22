@@ -4,35 +4,61 @@ const userservice = require("../service/userservice");
 
 const userRegister = async (req, res) => {
   try {
-    const { name, image, google_id } = req.body;
+    const { google_id } = req.body;
+    const doesUserExist = await userservice.getGoogleIdCheck(google_id);
 
-    let imagePath;
-
-    // Check if the request contains a file (image)
-    if (req.file) {
-      imagePath = req.file.filename;
-    }
-
-    const googleId = uuidv4();
-
-    const existingUser = await userservice.getggogleidcheck(google_id);
-
-    if (existingUser) {
-      return res.status(400).json({
-        error: "User with this Google ID already exists.",
+    if (doesUserExist) {
+      userservice.login(google_id, (error, result) => {
+        if (error) {
+          return res
+            .status(500)
+            .json({ error: "An unexpected error occurred." });
+        }
+        return res.status(200).json({
+          message: "user login succcesfull",
+          status: 201,
+          data: result.data,
+          token: result.token,
+        });
       });
+    } else {
+      const { name } = req.body;
+      let imagePath;
+
+      // Check if the request contains a file (image)
+      if (req.file) {
+        imagePath = req.file.filename;
+      }
+  
+      if (!name) {
+        return res.status(400).json({
+          error: "Name is required for registration.",
+        });
+      }
+       const googleId = uuidv4()
+      const userRegis = await userservice.registeruser({
+        name,
+        image: imagePath,
+        google_id: googleId,
+      });
+
+      const newUserToken = userservice.registerlogin(userRegis); 
+  if(newUserToken) {
+    userservice.registerlogin(name, (error, result) => {
+      if (error) {
+        return res
+          .status(500)
+          .json({ error: "An unexpected error occurred." });
+      }
+      return res.status(200).json({
+        message: "user login succcesfull",
+        status: 201,
+        data: result.data,
+        token: result.token,
+      });
+    });
+  }
     }
-
-    const userRegis = await userservice.registeruser({
-      name,
-      image: imagePath,
-      google_id: googleId,
-    });
-
-    res.status(201).json({
-      message: userRegis,
-      status: 201,
-    });
   } catch (error) {
     if (error instanceof YourSpecificError) {
       return res

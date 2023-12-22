@@ -80,7 +80,6 @@ const validateLogin = (req, res, next) => {
 
 const addlike = Joi.object({
   post_id: Joi.number().required(),
-  user_id : Joi.number().required()
 });
 
 const Validatelike = (req, res, next) => {
