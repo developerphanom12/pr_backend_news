@@ -142,6 +142,29 @@ const validateUnlike= (req, res, next) => {
   next();
 };
 
+
+
+
+const addpost = Joi.object({
+  title: Joi.string().required(),
+  descriptions: Joi.string().required(),
+  category_id: Joi.number().required(),
+
+});
+
+const validatepost = (req, res, next) => {
+  const { error } = addpost.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+
+  next();
+};
+
+
+
   module.exports ={
     VALIDATECREATOR,
     validateUser,
@@ -150,5 +173,6 @@ const validateUnlike= (req, res, next) => {
     Validatelike,
     Validatefollower,
     validateUnfollow,
-    validateUnlike
+    validateUnlike,
+    validatepost
   }

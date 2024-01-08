@@ -472,7 +472,7 @@ function getallpostbyId(userId,offset, pageSize) {
         c.id,
           c.creator_id,
           c.media,
-          c.title,
+          c.title AS titles,
           c.descriptions,
           u.id AS category_id,
           u.title,
@@ -490,13 +490,14 @@ function getallpostbyId(userId,offset, pageSize) {
       } else {
         const posts = results.map((row) => ({
           id: row.id,
+          media: row.media,
+          titles: row.titles,
+          descriptions: row.descriptions,
           creator: {
             creator_id: row.creator_id,
             creator_name: row.creator_name,
           },
-          media: row.media,
-          title: row.title,
-          descriptions: row.descriptions,
+       
           category: {
             id: row.category_id,
             title: row.title,
@@ -565,6 +566,56 @@ function searchKeyPosttitle(postTitle) {
 }
 
 
+function addPost(postData) {
+  return new Promise((resolve, reject) => {
+    const insertSql = `INSERT INTO  post_table(creator_id, media, title, descriptions, category_id) 
+                           VALUES (?,?,?,?,?)`;
+
+    const values = [
+      postData.creator_id,
+      postData.media,
+      postData.title,
+      postData.descriptions,
+      postData.category_id
+    ];
+
+    db.query(insertSql, values, (error, result) => {
+      if (error) {
+        console.error('Error adding creator:', error);
+        reject(error);
+      } else {
+        const adminId = result.insertId;
+
+        if (adminId > 0) {
+          const successMessage = 'add post  successful';
+          resolve(successMessage);
+        } else {
+          const errorMessage = 'add post failed';
+          reject(errorMessage);
+        }
+      }
+    });
+  });
+}
+
+
+
+const checkid = (userId) => {
+  return new Promise((resolve, reject) => {
+    const checkUserSql = 'SELECT * FROM  creator_users_data WHERE id = ?';
+
+    db.query(checkUserSql, [userId], (error, result) => {
+      if (error) {
+        console.error('Error checking user existence:', error);
+        reject(error);
+      } else {
+        resolve(result.length > 0); 
+        console.log(result.length)
+      }
+    });
+  });
+};
+
 
 module.exports = {
   registerCreator,
@@ -582,5 +633,7 @@ module.exports = {
   RemoveFollower,
   RemoveLIke,
   getallpostbyId,
-  searchKeyPosttitle
+  searchKeyPosttitle,
+  addPost,
+  checkid
 }

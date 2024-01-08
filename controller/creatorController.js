@@ -86,7 +86,7 @@ const postadd = async (req, res) => {
     const { creator_id, title, descriptions, category_id } = req.body;
 
 
-    const userExists = await creatorService.checkcreatorexist(userId);
+    const userExists = await creatorService.checkid(userId);
 
     if (!userExists) {
       return res.status(404).json({
@@ -102,7 +102,7 @@ const postadd = async (req, res) => {
     }
     const imagePath = req.file.filename;
 
-    const universityData = await creatorService.addpost({
+    const universityData = await creatorService.addPost({
       creator_id: userId,
       media: imagePath,
       title,
@@ -184,7 +184,7 @@ const aprooveCreator = async (req, res) => {
   }
 };
 
-const getallpost = async (req, res) => {
+const   getallpost = async (req, res) => {
 
   const { postTitle } = req.query;
   const userId = req.user.id
