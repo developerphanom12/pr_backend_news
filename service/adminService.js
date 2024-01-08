@@ -75,9 +75,28 @@ function loginadmin(username, password, callback) {
 
 
 
+function getallcategory() {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT * 
+        FROM category WHERE is_deleted = 0
+      
+      `;
+  
+      db.query(query, (error, results) => {
+        if (error) {
+          console.error('Error executing query:', error);
+          reject(error);
+        } else  {
+          resolve(results)
+        };
+      })
+    })
+  }
 
 
 module.exports = {
     adminregister,
-    loginadmin
+    loginadmin,
+    getallcategory
 }

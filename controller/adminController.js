@@ -56,7 +56,40 @@ const loginadmin = async (req, res) => {
   };
   
 
+
+
+const allcategory = async (req, res) => {
+  try {
+  
+      const clientdata = await admin.getallcategory();
+
+      if (clientdata) {
+        res.status(201).json({
+          message: "Data fetched successfully",
+          status: 201,
+          data: clientdata,
+        });
+      } else {
+        const responseMessage =
+          "No data found for the provided ID telecaller id.";
+        res.status(404).json({
+          message: responseMessage,
+          status: 404,
+        });
+      }
+    }
+   catch (error) {
+    console.error("Error in getdataclientwithca:", error);
+    res.status(500).json({
+      message: "Internal server error",
+      status: 500,
+    });
+  }
+};
+
+
   module.exports = {
     registerAdmin,
-    loginadmin
+    loginadmin,
+    allcategory
   }

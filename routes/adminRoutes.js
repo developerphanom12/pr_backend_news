@@ -6,5 +6,6 @@ router.post('/adminregister', admincontroller.registerAdmin)
 
 router.post('/adminlogin', admincontroller.loginadmin)
 
+router.get('/getcateogery', admincontroller.allcategory)
 
 module.exports = router;
