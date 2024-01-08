@@ -162,7 +162,7 @@ function searchKeyPost(postTitle) {
       LEFT JOIN
         creator_users_data cu ON c.creator_id = cu.id
       WHERE
-        c.title LIKE CONCAT('%', ?, '%');`;
+        c.category_id LIKE CONCAT('%', ?, '%');`;
 
     db.query(query, [postTitle], (error, results) => {
       if (error) {
@@ -515,6 +515,57 @@ function getallpostbyId(userId,offset, pageSize) {
   });
 }
 
+function searchKeyPosttitle(postTitle) {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT
+        c.id,
+        c.creator_id,
+        c.media,
+        c.title,
+        c.descriptions,
+        u.id AS category_id,
+        u.title AS category_title,
+        cu.creator_name
+      FROM
+        post_table c
+      INNER JOIN
+        category u ON c.category_id = u.id
+      LEFT JOIN
+        creator_users_data cu ON c.creator_id = cu.id
+      WHERE
+        c.title LIKE CONCAT('%', ?, '%');`;
+
+    db.query(query, [postTitle], (error, results) => {
+      if (error) {
+        console.error('Error executing query:', error);
+        reject(error);
+      } else {
+        const posts = results.map((row) => ({
+          id: row.id,
+          creator: {
+            creator_id: row.creator_id,
+            creator_name: row.creator_name,
+          },
+          media: row.media,
+          title: row.title,
+          descriptions: row.descriptions,
+          category: {
+            id: row.category_id,
+            title: row.category_title,
+          },
+        }));
+
+        resolve(posts);
+
+        console.log('Posts retrieved successfully');
+      }
+    });
+  });
+}
+
+
+
 module.exports = {
   registerCreator,
   logincreator,
@@ -530,5 +581,6 @@ module.exports = {
   getallFollowr,
   RemoveFollower,
   RemoveLIke,
-  getallpostbyId
+  getallpostbyId,
+  searchKeyPosttitle
 }

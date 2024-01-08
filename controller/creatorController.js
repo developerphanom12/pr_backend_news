@@ -196,7 +196,7 @@ console.log("useridrole", userId,role)
     let getallPosts;
 
     if (postTitle) {
-      getallPosts = await creatorService.searchKeyPost(postTitle);
+      getallPosts = await creatorService.searchKeyPosttitle(postTitle);
 
       if (getallPosts.length === 0) {
         return res.status(404).json({
@@ -205,15 +205,7 @@ console.log("useridrole", userId,role)
         });
       }
     }
-    //  else {
-    //   getallPosts = await creatorService.getallpost(offset, pageSize);
-    //   if (getallPosts.length === 0) {
-    //     return res.status(404).json({
-    //       message: 'No posts found.',
-    //       status: 404,
-    //     });
-    //   }
-    // }
+   
      if(role === 'creator'){
       getallPosts = await creatorService.getallpostbyId(userId,offset, pageSize);
       if (getallPosts.length === 0) {
@@ -684,10 +676,8 @@ const getpostwithoutath = async (req, res) => {
       getallPosts = await creatorService.searchKeyPost(postTitle);
 
       if (getallPosts.length === 0) {
-        return res.status(404).json({
-          message: `No posts found with applicationStatus '${postTitle}'.`,
-          status: 404,
-        });
+        getallPosts = await creatorService.getallpost(offset, pageSize);
+
       }
     }
      else {
