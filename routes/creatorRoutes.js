@@ -35,5 +35,8 @@ router.put('/unlike',validateUnlike,authenticateToken, creatorCOntroller.removel
 
 router.post('/addpost',upload.single('media'),validatepost, authenticateToken, creatorCOntroller.postadd)
 
+router.post('/aproove' , authenticateToken, creatorCOntroller.aprooveCreator)
+
+router.post('/deletepost' , authenticateToken, creatorCOntroller.deletePost)
 
 module.exports = router;

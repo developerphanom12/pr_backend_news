@@ -728,6 +728,53 @@ const getpostwithoutath = async (req, res) => {
     res.status(500).json({ error: 'An unexpected error occurred. Please try again later.' });
   }
 };
+
+
+
+
+const deletePost = async (req, res) => {
+  const { userId, is_deleted } = req.body;
+
+  try {
+
+    if (is_deleted !== 1) {
+      throw {
+        status: 400,
+        error: 'Invalid is_deleted only value 1.'
+      };
+    }
+
+    creatorService.updatepsotdlt(is_deleted, userId, (error, result) => {
+      if (error) {
+        console.error('Error delete post status:', error);
+        throw {
+          status: 500,
+          error: 'Failed to   delete post.'
+        };
+      }
+
+      console.log(' status updated successfully');
+
+      res.status(200).json({
+        status: 200,
+        message: 'status updated successfully'
+      });
+    });
+  } catch (error) {
+    if (error instanceof YourSpecificError) {
+      return res.status(400).json({ error: 'An error occurred while processing your request.' });
+    }
+
+    if (error.name === 'UnauthorizedError') {
+      return res.status(401).json({ error: 'Unauthorized access' });
+    }
+
+    console.error('Internal Server Error:', error);
+
+    res.status(500).json({ error: 'An unexpected error occurred. Please try again later.' });
+  }
+};
+
 module.exports = {
   registerCreatorHandler,
   creatorlogin,
@@ -741,5 +788,6 @@ module.exports = {
   getFolloewer,
   removeFollower,
   removelike,
-  getpostwithoutath
+  getpostwithoutath,
+  deletePost
 }

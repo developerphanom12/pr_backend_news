@@ -480,7 +480,7 @@ function getallpostbyId(userId,offset, pageSize) {
         FROM post_table c
         INNER JOIN category u ON c.category_id = u.id
         LEFT JOIN  creator_users_data cu ON c.creator_id = cu.id
-        WHERE c.creator_id = ?
+        WHERE c.creator_id = ? AND c.is_deleted = 0
         LIMIT ?, ?;`;
 
     db.query(query, [userId,offset, parseInt(pageSize, 10)], (error, results) => {
@@ -617,6 +617,25 @@ const checkid = (userId) => {
 };
 
 
+
+const updatepsotdlt = (is_deleted, userId, callback) => {
+  const updateQuery = 'UPDATE  post_table SET is_deleted	 = ? WHERE id = ?';
+
+  db.query(updateQuery, [is_deleted, userId], (error, result) => {
+    if (error) {
+      console.error('Error while update creator status:', error);
+      return callback(error, null);
+    }
+
+    if (result.affectedRows === 0) {
+      return callback(null, { error: 'creator not found' });
+    }
+
+    return callback(null, { message: 'creator status updated successfully' });
+  });
+};
+
+
 module.exports = {
   registerCreator,
   logincreator,
@@ -635,5 +654,6 @@ module.exports = {
   getallpostbyId,
   searchKeyPosttitle,
   addPost,
-  checkid
+  checkid,
+  updatepsotdlt
 }
