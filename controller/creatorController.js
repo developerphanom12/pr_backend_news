@@ -187,14 +187,9 @@ const aprooveCreator = async (req, res) => {
 const getallpost = async (req, res) => {
 
   const { postTitle } = req.query;
-
-  if (req.user.role !== 'user') {
-    return res.status(403).json({
-      status: 403,
-      error: 'Forbidden for admin and creator only users can see this',
-    });
-  }
-
+  const userId = req.user.id
+  const role = req.user.role 
+console.log("useridrole", userId,role)
   try {
     const { page = 1, pageSize = 10 } = req.query;
     const offset = (page - 1) * pageSize;
@@ -209,8 +204,18 @@ const getallpost = async (req, res) => {
           status: 404,
         });
       }
-    } else {
-      getallPosts = await creatorService.getallpost(offset, pageSize);
+    }
+    //  else {
+    //   getallPosts = await creatorService.getallpost(offset, pageSize);
+    //   if (getallPosts.length === 0) {
+    //     return res.status(404).json({
+    //       message: 'No posts found.',
+    //       status: 404,
+    //     });
+    //   }
+    // }
+     if(role === 'creator'){
+      getallPosts = await creatorService.getallpostbyId(userId,offset, pageSize);
       if (getallPosts.length === 0) {
         return res.status(404).json({
           message: 'No posts found.',
@@ -666,6 +671,73 @@ const removelike = async (req, res) => {
 };
 
 
+const getpostwithoutath = async (req, res) => {
+
+  const { postTitle } = req.query;
+  
+  try {
+    const { page = 1, pageSize = 10 } = req.query;
+    const offset = (page - 1) * pageSize;
+    let getallPosts;
+
+    if (postTitle) {
+      getallPosts = await creatorService.searchKeyPost(postTitle);
+
+      if (getallPosts.length === 0) {
+        return res.status(404).json({
+          message: `No posts found with applicationStatus '${postTitle}'.`,
+          status: 404,
+        });
+      }
+    }
+     else {
+      getallPosts = await creatorService.getallpost(offset, pageSize);
+      if (getallPosts.length === 0) {
+        return res.status(404).json({
+          message: 'No posts found.',
+          status: 404,
+        });
+      }
+    }
+     
+    const totalCount = await creatorService.getTotalPostCount();
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    if (getallPosts.length > 0) {
+      res.status(200).json({
+        message: "Posts fetched successfully",
+        status: 200,
+        data: {
+          posts: getallPosts,
+          pagination: {
+            page: parseInt(page),
+            pageSize: parseInt(pageSize),
+            totalItems: totalCount,
+            totalPages,
+          },
+        },
+      });
+    } else {
+      const responseMessage = 'No posts found.';
+      res.status(404).json({
+        message: responseMessage,
+        status: 404,
+      });
+    }
+  } catch (error) {
+    if (error instanceof YourSpecificError) {
+      return res.status(400).json({ error: 'An error occurred while processing your request.' });
+    }
+
+    if (error.name === 'UnauthorizedError') {
+      return res.status(401).json({ error: 'Unauthorized access' });
+    }
+
+    console.error('Internal Server Error:', error);
+
+    res.status(500).json({ error: 'An unexpected error occurred. Please try again later.' });
+  }
+};
 module.exports = {
   registerCreatorHandler,
   creatorlogin,
@@ -678,5 +750,6 @@ module.exports = {
   addFollower,
   getFolloewer,
   removeFollower,
-  removelike
+  removelike,
+  getpostwithoutath
 }

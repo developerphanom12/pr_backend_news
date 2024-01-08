@@ -464,6 +464,57 @@ function RemoveLIke(removeLike) {
 }
 
 
+
+function getallpostbyId(userId,offset, pageSize) {
+  return new Promise((resolve, reject) => {
+    const query = `
+        SELECT
+        c.id,
+          c.creator_id,
+          c.media,
+          c.title,
+          c.descriptions,
+          u.id AS category_id,
+          u.title,
+          cu.creator_name
+        FROM post_table c
+        INNER JOIN category u ON c.category_id = u.id
+        LEFT JOIN  creator_users_data cu ON c.creator_id = cu.id
+        WHERE c.creator_id = ?
+        LIMIT ?, ?;`;
+
+    db.query(query, [userId,offset, parseInt(pageSize, 10)], (error, results) => {
+      if (error) {
+        console.error('Error executing query:', error);
+        reject(error);
+      } else {
+        const posts = results.map((row) => ({
+          id: row.id,
+          creator: {
+            creator_id: row.creator_id,
+            creator_name: row.creator_name,
+          },
+          media: row.media,
+          title: row.title,
+          descriptions: row.descriptions,
+          category: {
+            id: row.category_id,
+            title: row.title,
+          },
+          is_active: row.is_active,
+          create_date: row.create_date,
+          update_date: row.update_date,
+          is_deleted: row.is_deleted,
+        }));
+
+        resolve(posts);
+
+        console.log('Posts retrieved successfully');
+      }
+    });
+  });
+}
+
 module.exports = {
   registerCreator,
   logincreator,
@@ -478,5 +529,6 @@ module.exports = {
   Addfoloowr,
   getallFollowr,
   RemoveFollower,
-  RemoveLIke
+  RemoveLIke,
+  getallpostbyId
 }
