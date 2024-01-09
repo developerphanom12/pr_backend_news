@@ -388,7 +388,7 @@ function getallFollowr(creatorId) {
           a.name
           FROM follower_table c
       LEFT JOIN user_register a ON c.user_id = a.id
-      WHERE c.creator_id = ?;`;
+      WHERE c.creator_id = ? AND c.is_deleted = 0;`;
 
     db.query(query, [creatorId], (error, results) => {
       if (error) {

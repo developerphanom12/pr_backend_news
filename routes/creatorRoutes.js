@@ -24,7 +24,6 @@ router.post('/likeadd',Validatelike, authenticateToken, creatorCOntroller.likePo
 
 router.get('/comment/:id',authenticateToken, creatorCOntroller.getcommentbyPostid)
 
-
 router.post('/addfollower',Validatefollower, authenticateToken, creatorCOntroller.addFollower)
 
 router.get('/checkfollower',authenticateToken, creatorCOntroller.getFolloewer)
@@ -42,5 +41,6 @@ router.post('/deletepost' , authenticateToken, creatorCOntroller.deletePost)
 router.get('/gedataown', authenticateToken, creatorCOntroller.getdataownclient)
 
 router.post('/unfollowbyCretor',validateUnfollowbyCreator,authenticateToken, creatorCOntroller.removefolowerbycreator)
+
 
 module.exports = router;

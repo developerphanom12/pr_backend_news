@@ -25,7 +25,6 @@ const userRegister = async (req, res) => {
       const { name } = req.body;
       let imagePath;
 
-      // Check if the request contains a file (image)
       if (req.file) {
         imagePath = req.file.filename;
       }
