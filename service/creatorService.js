@@ -636,6 +636,24 @@ const updatepsotdlt = (is_deleted, userId, callback) => {
 };
 
 
+
+function getdataown(userId) {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT * 
+      FROM creator_users_data WHERE id =? AND is_deleted = 0
+    `;
+
+    db.query(query,userId, (error, results) => {
+      if (error) {
+        console.error('Error executing query:', error);
+        reject(error);
+      } else  {
+        resolve(results)
+      };
+    })
+  })
+}
 module.exports = {
   registerCreator,
   logincreator,
@@ -655,5 +673,6 @@ module.exports = {
   searchKeyPosttitle,
   addPost,
   checkid,
-  updatepsotdlt
+  updatepsotdlt,
+  getdataown
 }

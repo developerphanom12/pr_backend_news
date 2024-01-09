@@ -83,7 +83,7 @@ const postadd = async (req, res) => {
     }
 
     const userId = req.user.id;
-    const { creator_id, title, descriptions, category_id } = req.body;
+    const { creator_id, title, descriptions, category_id ,media} = req.body;
 
 
     const userExists = await creatorService.checkid(userId);
@@ -95,16 +95,17 @@ const postadd = async (req, res) => {
       });
     }
 
-    if (!req.file) {
-      return res.status(400).json({
-        error: 'media  file is required.',
-      });
-    }
-    const imagePath = req.file.filename;
+      if (!req.file) {
+        return res.status(400).json({
+          status:400,
+          error: 'media  file is required.',
+        });
+      }
+      const imagePath = req.file.filename;
 
     const universityData = await creatorService.addPost({
       creator_id: userId,
-      media: imagePath,
+      media:imagePath,
       title,
       descriptions,
       category_id,
@@ -775,6 +776,48 @@ const deletePost = async (req, res) => {
   }
 };
 
+
+
+
+const getdataownclient = async (req, res) => {
+  const userId = req.user.id
+  try {
+  if(!userId){
+    res.status(404).json({status:404, message : "please provide userId"})
+  }
+      const clientdata = await creatorService.getdataown(userId);
+
+      if (clientdata) {
+        res.status(201).json({
+          message: "Data fetched successfully",
+          status: 201,
+          data: clientdata,
+        });
+      } else {
+        const responseMessage =
+          "No data found for the provided ID.";
+        res.status(404).json({
+          message: responseMessage,
+          status: 404,
+        });
+      }
+    }
+    catch (error) {
+      if (error instanceof YourSpecificError) {
+        return res.status(400).json({ error: 'An error occurred while processing your request.' });
+      }
+  
+      if (error.name === 'UnauthorizedError') {
+        return res.status(401).json({ error: 'Unauthorized access' });
+      }
+  
+      console.error('Internal Server Error:', error);
+  
+      res.status(500).json({ error: 'An unexpected error occurred. Please try again later.' });
+    }
+  };
+  
+
 module.exports = {
   registerCreatorHandler,
   creatorlogin,
@@ -789,5 +832,6 @@ module.exports = {
   removeFollower,
   removelike,
   getpostwithoutath,
-  deletePost
+  deletePost,
+  getdataownclient
 }

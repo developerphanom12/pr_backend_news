@@ -39,4 +39,6 @@ router.post('/aproove' , authenticateToken, creatorCOntroller.aprooveCreator)
 
 router.post('/deletepost' , authenticateToken, creatorCOntroller.deletePost)
 
+router.get('/gedataown', authenticateToken, creatorCOntroller.getdataownclient)
+
 module.exports = router;
