@@ -2,7 +2,7 @@
 const  express = require('express')
 const router = express.Router();
 const creatorCOntroller = require('../controller/creatorController');
-const { VALIDATECREATOR, validatecomment, validateLogin, Validatelike, Validatefollower, validateUnfollow, validateUnlike, validatepost } = require('../middleware/validation');
+const { VALIDATECREATOR, validatecomment, validateLogin, Validatelike, Validatefollower, validateUnfollow, validateUnlike, validatepost, validateUnfollowbyCreator } = require('../middleware/validation');
 const { upload } = require('../multer/multer');
 const authenticateToken = require('../auth/token');
 
@@ -40,5 +40,7 @@ router.post('/aproove' , authenticateToken, creatorCOntroller.aprooveCreator)
 router.post('/deletepost' , authenticateToken, creatorCOntroller.deletePost)
 
 router.get('/gedataown', authenticateToken, creatorCOntroller.getdataownclient)
+
+router.post('/unfollowbyCretor',validateUnfollowbyCreator,authenticateToken, creatorCOntroller.removefolowerbycreator)
 
 module.exports = router;

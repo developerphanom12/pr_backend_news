@@ -818,6 +818,65 @@ const getdataownclient = async (req, res) => {
   };
   
 
+
+
+const removefolowerbycreator = async (req, res) => {
+  const role = req.user.role;
+  console.log("role", role);
+  const userId = req.user.id;
+  console.log('userid', userId);
+
+  try {
+    if (req.user.role !== 'creator') {
+      return res.status(403).json({
+        status: 403,
+        error: 'Forbidden for admin and creator only users can see this',
+      });
+    }
+
+    const { user_id } = req.body;
+
+    const removedFollower = await creatorService.RemoveFollowerBycreator({
+      user_id,
+      creator_id :userId,
+    });
+
+    if (removedFollower) {
+      res.status(200).json({
+        message: 'Unfollow successful',
+        status: 200,
+      });
+    } else {
+      res.status(404).json({
+        status: 404,
+        error: 'Follower not found',
+      });
+    }
+  } catch (error) {
+    if (error instanceof YourSpecificError) {
+      return res.status(400).json({
+        status: 400,
+        error: 'An error occurred while processing your request.'
+      });
+    }
+
+    if (error.name === 'UnauthorizedError') {
+      return res.status(401).json({
+        status: 401,
+        error: 'Unauthorized access'
+      });
+    }
+
+    console.error('Internal Server Error:', error);
+
+    res.status(500).json({
+      status: 500,
+      error: 'An unexpected error occurred. Please try again later.'
+    });
+  }
+};
+
+
 module.exports = {
   registerCreatorHandler,
   creatorlogin,
@@ -833,5 +892,6 @@ module.exports = {
   removelike,
   getpostwithoutath,
   deletePost,
-  getdataownclient
+  getdataownclient,
+  removefolowerbycreator,
 }

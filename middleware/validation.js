@@ -144,6 +144,22 @@ const validateUnlike= (req, res, next) => {
 
 
 
+const unfollowbycreator= Joi.object({
+  user_id: Joi.number().required(),
+});
+
+const validateUnfollowbyCreator = (req, res, next) => {
+  const { error } = unfollowbycreator.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+
+  next();
+};
+
+
 
 const addpost = Joi.object({
   title: Joi.string().required(),
@@ -174,5 +190,6 @@ const validatepost = (req, res, next) => {
     Validatefollower,
     validateUnfollow,
     validateUnlike,
-    validatepost
+    validatepost,
+    validateUnfollowbyCreator
   }
