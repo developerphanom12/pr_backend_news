@@ -385,7 +385,8 @@ function getallFollowr(creatorId) {
           c.id,
           c.creator_id,
           a.id AS user_id,
-          a.name
+          a.name,
+          a.image
           FROM follower_table c
       LEFT JOIN user_register a ON c.user_id = a.id
       WHERE c.creator_id = ? AND c.is_deleted = 0;`;
@@ -400,6 +401,7 @@ function getallFollowr(creatorId) {
           user: {
             id: row.user_id,
             name: row.name,
+            image: row.image
           },
         }));
 
