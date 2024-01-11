@@ -824,8 +824,6 @@ function gettotalbycategory(creatorId) {
   });
 }
 
-//
-
 function getbyPostid(postid) {
   return new Promise((resolve, reject) => {
     const query = `

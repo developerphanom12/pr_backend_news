@@ -5,13 +5,13 @@ const creatorCOntroller = require('../controller/creatorController');
 const { VALIDATECREATOR, validatecomment, validateLogin, Validatelike, Validatefollower, validateUnfollow, validateUnlike, validatepost, validateUnfollowbyCreator } = require('../middleware/validation');
 const { upload } = require('../multer/multer');
 const authenticateToken = require('../auth/token');
-
+ 
 
 router.post('/registercreator',upload.single('image'), VALIDATECREATOR,creatorCOntroller.registerCreatorHandler) 
 
 router.post('/logincreator',validateLogin,creatorCOntroller.creatorlogin) 
 
-
+ 
 router.get('/getallpost' ,authenticateToken, creatorCOntroller.getallpost)
 
 router.get('/getdataBycategory' , creatorCOntroller.getpostwithoutath)
