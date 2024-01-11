@@ -981,7 +981,63 @@ const gethomedata = async (req, res) => {
     }
 
 
+   
+const geyByPostId = async (req, res) => {
+  try {
+    const postid = req.params.id;
+    console.log('sdfsdfsdf', postid);
+
+
+    if (!postid) {
+      return res.status(400).json({
+        message: "please provide postid",
+        status: 400
+      })
+    }
+    let byId;
+    byId = await creatorService.getbyPostid(postid);
+
+
+
+
     
+    if (byId.length > 0) {
+      res.status(201).json({
+        message: "data fetched successfully",
+        status: 201,
+        data: byId
+      });
+    } else {
+      const responseMessage = 'No datafound for the provided ID.';
+      res.status(404).json({
+        message: responseMessage,
+        status: 404
+      });
+    }
+  } catch (error) {
+    if (error instanceof YourSpecificError) {
+      return res.status(400).json({
+        status: 400,
+        error: 'An error occurred while processing your request.'
+      });
+    }
+
+    if (error.name === 'UnauthorizedError') {
+      return res.status(401).json({
+        status: 401,
+        error: 'Unauthorized access'
+      });
+    }
+
+    console.error('Internal Server Error:', error);
+
+    res.status(500).json({
+      status: 500,
+      error: 'An unexpected error occurred. Please try again later.'
+    });
+  }
+};
+ 
 
 module.exports = {
   registerCreatorHandler,
@@ -1000,6 +1056,7 @@ module.exports = {
   deletePost,
   getdataownclient,
   removefolowerbycreator,
-  gethomedata
+  gethomedata,
+  geyByPostId
 }
 

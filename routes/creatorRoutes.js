@@ -45,4 +45,7 @@ router.post('/unfollowbyCretor',validateUnfollowbyCreator,authenticateToken, cre
 
 router.get('/getposthome' , creatorCOntroller.gethomedata)
 
+router.get('/getby/:id', creatorCOntroller.geyByPostId)
+
+
 module.exports = router;

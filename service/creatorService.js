@@ -1,4 +1,4 @@
-const moment = require('moment');
+const moment = require("moment");
 const db = require("../database/database");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -180,7 +180,7 @@ function searchKeyPost(postTitle) {
   });
 }
 
-function getallpost(creatorId,offset, pageSize) {
+function getallpost(creatorId, offset, pageSize) {
   return new Promise((resolve, reject) => {
     const query = `
         SELECT
@@ -198,45 +198,49 @@ function getallpost(creatorId,offset, pageSize) {
         where c.category_id = ?
         LIMIT ?, ?;`;
 
+    let parmas = [creatorId];
+    db.query(
+      query,
+      [parmas, offset, parseInt(pageSize, 10)],
+      (error, results) => {
+        if (error) {
+          console.error("Error executing query:", error);
+          reject(error);
+        } else {
+          const posts = results.map((row) => ({
+            id: row.id,
+            creator: {
+              creator_id: row.creator_id,
+              creator_name: row.creator_name,
+            },
+            media: row.media,
+            titles: row.titles,
+            descriptions: row.descriptions,
+            category: {
+              id: row.category_id,
+              title: row.title,
+            },
+            is_active: row.is_active,
+            create_date: row.create_date,
+            update_date: row.update_date,
+            is_deleted: row.is_deleted,
+          }));
 
-        let parmas= [creatorId]
-    db.query(query, [parmas,offset,parseInt(pageSize, 10)], (error, results) => {
-      if (error) {
-        console.error("Error executing query:", error);
-        reject(error);
-      } else {
-        const posts = results.map((row) => ({
-          id: row.id,
-          creator: {
-            creator_id: row.creator_id,
-            creator_name: row.creator_name,
-          },
-          media: row.media,
-          titles: row.titles,
-          descriptions: row.descriptions,
-          category: {
-            id: row.category_id,
-            title: row.title,
-          },
-          is_active: row.is_active,
-          create_date: row.create_date,
-          update_date: row.update_date,
-          is_deleted: row.is_deleted,
-        }));
+          resolve(posts);
 
-        resolve(posts);
-
-        console.log("Posts retrieved successfully");
+          console.log("Posts retrieved successfully");
+        }
       }
-    });
+    );
   });
 }
 
 function getTotalPostCount(userId) {
   return new Promise((resolve, reject) => {
-    const countQuery = "SELECT COUNT(*) AS totalCount FROM post_table  where creator_id = ? AND is_deleted = 0;";
+    const countQuery =
+      "SELECT COUNT(*) AS totalCount FROM post_table  where creator_id = ? AND is_deleted = 0;";
 
-    db.query(countQuery,userId, (error, results) => {
+    db.query(countQuery, userId, (error, results) => {
       if (error) {
         console.error("Error executing count query:", error);
         reject(error);
@@ -269,7 +273,7 @@ const updatestatus = (is_approved, userId, callback) => {
 function likeadd(likeAdd) {
   return new Promise((resolve, reject) => {
     const insertSql = `INSERT INTO likes_table(post_id,user_id) 
-                         VALUES (?,?,?)`;
+                         VALUES (?,?)`;
 
     const values = [likeAdd.post_id, likeAdd.user_id];
 
@@ -682,8 +686,8 @@ function gethomedata() {
             title: row.title,
           },
           is_active: row.is_active,
-          created_at: moment(row.created_at).format('YYYY-MM-DD HH:mm A'), 
-          updated_at: moment(row.updated_at).format('YYYY-MM-DD HH:mm A'), 
+          created_at: moment(row.created_at).format("YYYY-MM-DD HH:mm A"),
+          updated_at: moment(row.updated_at).format("YYYY-MM-DD HH:mm A"),
           is_deleted: row.is_deleted,
         }));
 
@@ -749,8 +753,6 @@ function getcatdata() {
   });
 }
 
-
-
 function getbusisnessnews() {
   return new Promise((resolve, reject) => {
     const query = `
@@ -805,19 +807,86 @@ function getbusisnessnews() {
   });
 }
 
-
-
 function gettotalbycategory(creatorId) {
   return new Promise((resolve, reject) => {
-    const countQuery = "SELECT COUNT(*) AS totalCount FROM post_table WHERE category_id = ?;";
+    const countQuery =
+      "SELECT COUNT(*) AS totalCount FROM post_table WHERE category_id = ?;";
 
-    db.query(countQuery,creatorId, (error, results) => {
+    db.query(countQuery, creatorId, (error, results) => {
       if (error) {
         console.error("Error executing count query:", error);
         reject(error);
       } else {
         const totalCount = results[0].totalCount;
         resolve(totalCount);
+      }
+    });
+  });
+}
+
+//
+
+function getbyPostid(postid) {
+  return new Promise((resolve, reject) => {
+    const query = `
+    SELECT
+    p.id,
+    p.creator_id,
+    p.media,
+    p.title AS titles,
+    p.descriptions,
+    p.created_at,
+    u.id AS category_id,
+    u.title ,
+    cu.creator_name,
+    COALESCE(comment_counts.total_comments, 0) AS total_comments,
+    COALESCE(like_counts.total_like, 0) AS total_like
+    FROM post_table p
+    INNER JOIN category u ON p.category_id = u.id
+    LEFT JOIN creator_users_data cu ON p.creator_id = cu.id
+    LEFT JOIN (
+        SELECT post_id, COUNT(id) AS total_comments
+        FROM comment_table
+        GROUP BY post_id
+    ) comment_counts ON p.id = comment_counts.post_id
+    LEFT JOIN (
+        SELECT post_id, COUNT(id) AS total_like
+        FROM likes_table
+        GROUP BY post_id
+    ) like_counts ON p.id = like_counts.post_id
+      WHERE p.id = ?;
+;`;
+
+    db.query(query, [postid], (error, results) => {
+      if (error) {
+        console.error("Error executing query:", error);
+        reject(error);
+      } else {
+        const posts = results.map((row) => ({
+          id: row.id,
+          creator: {
+            creator_id: row.creator_id,
+            creator_name: row.creator_name,
+          },
+          media: row.media,
+          titles: row.titles,
+          descriptions: row.descriptions,
+          category: {
+            id: row.category_id,
+            title: row.title,
+          },
+
+          total_comments: row.total_comments,
+          total_like: row.total_like,
+
+          is_active: row.is_active,
+          created_at: moment(row.created_at).format("YYYY-MM-DD HH:mm A"),
+          updated_at:  moment(row.updated_at).format("YYYY-MM-DD HH:mm A"),
+          is_deleted: row.is_deleted,
+        }));
+        resolve(posts);
+
+        console.log("Posts retrieved successfully");
       }
     });
   });
@@ -848,5 +917,6 @@ module.exports = {
   gethomedata,
   getcatdata,
   getbusisnessnews,
-  gettotalbycategory
+  gettotalbycategory,
+  getbyPostid,
 };
