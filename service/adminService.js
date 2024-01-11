@@ -6,6 +6,7 @@ const dotenv = require('dotenv')
 
 dotenv.config();
 
+// const a
 
 function adminregister(courseData) {
     return new Promise((resolve, reject) => {
