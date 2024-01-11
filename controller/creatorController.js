@@ -666,15 +666,15 @@ const removelike = async (req, res) => {
 
 const getpostwithoutath = async (req, res) => {
 
-  const {searchbycat } = req.query;
+  const {creatorId } = req.query;
   
   try {
     const { page = 1, pageSize = 10 } = req.query;
     const offset = (page - 1) * pageSize;
     let getallPosts;
 
-    if (searchbycat) {
-      getallPosts = await creatorService.getallpost(searchbycat, offset, pageSize);
+    if (creatorId) {
+      getallPosts = await creatorService.getallpost(creatorId, offset, pageSize);
       if (getallPosts.length === 0) {
         return res.status(404).json({
           message: 'No posts found.',
@@ -685,7 +685,7 @@ const getpostwithoutath = async (req, res) => {
      else {
     }
      
-    const totalCount = await creatorService.gettotalbycategory(searchbycat);
+    const totalCount = await creatorService.gettotalbycategory(creatorId);
     const totalPages = Math.ceil(totalCount / pageSize);
 
     if (getallPosts.length > 0) {

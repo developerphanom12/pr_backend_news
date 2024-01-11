@@ -14,7 +14,7 @@ router.post('/logincreator',validateLogin,creatorCOntroller.creatorlogin)
 
 router.get('/getallpost' ,authenticateToken, creatorCOntroller.getallpost)
 
-router.get('/getpostauth' , creatorCOntroller.getpostwithoutath)
+router.get('/getdataBycategory' , creatorCOntroller.getpostwithoutath)
 
 
 router.post('/aproove' , authenticateToken, creatorCOntroller.aprooveCreator)

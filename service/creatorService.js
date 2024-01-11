@@ -179,7 +179,7 @@ function searchKeyPost(postTitle) {
   });
 }
 
-function getallpost(searchbycat,offset, pageSize) {
+function getallpost(creatorId,offset, pageSize) {
   return new Promise((resolve, reject) => {
     const query = `
         SELECT
@@ -198,7 +198,7 @@ function getallpost(searchbycat,offset, pageSize) {
         LIMIT ?, ?;`;
 
 
-        let parmas= [searchbycat]
+        let parmas= [creatorId]
     db.query(query, [parmas,offset,parseInt(pageSize, 10)], (error, results) => {
       if (error) {
         console.error("Error executing query:", error);
@@ -810,11 +810,11 @@ function getbusisnessnews() {
 
 
 
-function gettotalbycategory(searchbycat) {
+function gettotalbycategory(creatorId) {
   return new Promise((resolve, reject) => {
     const countQuery = "SELECT COUNT(*) AS totalCount FROM post_table WHERE category_id = ?;";
 
-    db.query(countQuery,searchbycat, (error, results) => {
+    db.query(countQuery,creatorId, (error, results) => {
       if (error) {
         console.error("Error executing count query:", error);
         reject(error);
