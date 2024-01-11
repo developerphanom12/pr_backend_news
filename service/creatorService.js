@@ -149,7 +149,7 @@ function searchKeyPost(postTitle) {
       LEFT JOIN
         creator_users_data cu ON c.creator_id = cu.id
       WHERE
-        c.category_id LIKE CONCAT('%', ?, '%');`;
+        c.title  LIKE CONCAT('%', ?, '%');`;
 
     db.query(query, [postTitle], (error, results) => {
       if (error) {
@@ -179,14 +179,14 @@ function searchKeyPost(postTitle) {
   });
 }
 
-function getallpost(offset, pageSize) {
+function getallpost(searchbycat,offset, pageSize) {
   return new Promise((resolve, reject) => {
     const query = `
         SELECT
         c.id,
           c.creator_id,
           c.media,
-          c.title,
+          c.title as titles,
           c.descriptions,
           u.id AS category_id,
           u.title,
@@ -194,9 +194,12 @@ function getallpost(offset, pageSize) {
         FROM post_table c
         INNER JOIN category u ON c.category_id = u.id
         LEFT JOIN  creator_users_data cu ON c.creator_id = cu.id
+        where c.category_id = ?
         LIMIT ?, ?;`;
 
-    db.query(query, [offset, parseInt(pageSize, 10)], (error, results) => {
+
+        let parmas= [searchbycat]
+    db.query(query, [parmas,offset,parseInt(pageSize, 10)], (error, results) => {
       if (error) {
         console.error("Error executing query:", error);
         reject(error);
@@ -208,7 +211,7 @@ function getallpost(offset, pageSize) {
             creator_name: row.creator_name,
           },
           media: row.media,
-          title: row.title,
+          titles: row.titles,
           descriptions: row.descriptions,
           category: {
             id: row.category_id,
@@ -228,11 +231,11 @@ function getallpost(offset, pageSize) {
   });
 }
 
-function getTotalPostCount() {
+function getTotalPostCount(userId) {
   return new Promise((resolve, reject) => {
-    const countQuery = "SELECT COUNT(*) AS totalCount FROM post_table;";
+    const countQuery = "SELECT COUNT(*) AS totalCount FROM post_table  where creator_id = ? AND is_deleted = 0;";
 
-    db.query(countQuery, (error, results) => {
+    db.query(countQuery,userId, (error, results) => {
       if (error) {
         console.error("Error executing count query:", error);
         reject(error);
@@ -805,6 +808,24 @@ function getbusisnessnews() {
   });
 }
 
+
+
+function gettotalbycategory(searchbycat) {
+  return new Promise((resolve, reject) => {
+    const countQuery = "SELECT COUNT(*) AS totalCount FROM post_table WHERE category_id = ?;";
+
+    db.query(countQuery,searchbycat, (error, results) => {
+      if (error) {
+        console.error("Error executing count query:", error);
+        reject(error);
+      } else {
+        const totalCount = results[0].totalCount;
+        resolve(totalCount);
+      }
+    });
+  });
+}
+
 module.exports = {
   registerCreator,
   logincreator,
@@ -829,5 +850,6 @@ module.exports = {
   RemoveFollowerBycreator,
   gethomedata,
   getcatdata,
-  getbusisnessnews
+  getbusisnessnews,
+  gettotalbycategory
 };

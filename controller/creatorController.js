@@ -217,7 +217,7 @@ console.log("useridrole", userId,role)
       }
     }
 
-    const totalCount = await creatorService.getTotalPostCount();
+    const totalCount = await creatorService.getTotalPostCount(userId);
     const totalPages = Math.ceil(totalCount / pageSize);
 
     if (getallPosts.length > 0) {
@@ -666,23 +666,15 @@ const removelike = async (req, res) => {
 
 const getpostwithoutath = async (req, res) => {
 
-  const { postTitle } = req.query;
+  const {searchbycat } = req.query;
   
   try {
     const { page = 1, pageSize = 10 } = req.query;
     const offset = (page - 1) * pageSize;
     let getallPosts;
 
-    if (postTitle) {
-      getallPosts = await creatorService.searchKeyPost(postTitle);
-
-      if (getallPosts.length === 0) {
-        getallPosts = await creatorService.getallpost(offset, pageSize);
-
-      }
-    }
-     else {
-      getallPosts = await creatorService.getallpost(offset, pageSize);
+    if (searchbycat) {
+      getallPosts = await creatorService.getallpost(searchbycat, offset, pageSize);
       if (getallPosts.length === 0) {
         return res.status(404).json({
           message: 'No posts found.',
@@ -690,8 +682,10 @@ const getpostwithoutath = async (req, res) => {
         });
       }
     }
+     else {
+    }
      
-    const totalCount = await creatorService.getTotalPostCount();
+    const totalCount = await creatorService.gettotalbycategory(searchbycat);
     const totalPages = Math.ceil(totalCount / pageSize);
 
     if (getallPosts.length > 0) {

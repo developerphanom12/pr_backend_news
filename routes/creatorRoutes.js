@@ -6,6 +6,7 @@ const { VALIDATECREATOR, validatecomment, validateLogin, Validatelike, Validatef
 const { upload } = require('../multer/multer');
 const authenticateToken = require('../auth/token');
 
+
 router.post('/registercreator',upload.single('image'), VALIDATECREATOR,creatorCOntroller.registerCreatorHandler) 
 
 router.post('/logincreator',validateLogin,creatorCOntroller.creatorlogin) 
