@@ -987,43 +987,6 @@ const gethomedata = async (req, res) => {
     }
 
 
-    const getHomeData = async (req, res) => {
-      try {
-        const latestPosts = await creatorService.getHomePosts();
-        const entertainmentData = await creatorService.getCategoryData('entertainment');
-        const businessData = await creatorService.getBusinessNews();
-    
-        if (latestPosts.length > 0) {
-          res.status(200).json({
-            message: "Data fetched successfully",
-            status: 200,
-            data: {
-              latest: latestPosts,
-              entertainment: entertainmentData,
-              business: businessData
-            },
-          });
-        } else {
-          const responseMessage = 'No posts found.';
-          res.status(404).json({
-            message: responseMessage,
-            status: 404,
-          });
-        }
-      } catch (error) {
-        if (error instanceof YourSpecificError) {
-          return res.status(400).json({ error: 'An error occurred while processing your request.' });
-        }
-    
-        if (error.name === 'UnauthorizedError') {
-          return res.status(401).json({ error: 'Unauthorized access' });
-        }
-    
-        console.error('Internal Server Error:', error);
-    
-        res.status(500).json({ error: 'An unexpected error occurred. Please try again later.' });
-      }
-    };
     
 
 module.exports = {
