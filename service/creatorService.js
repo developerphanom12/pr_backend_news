@@ -1,3 +1,4 @@
+const moment = require('moment');
 const db = require("../database/database");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -644,59 +645,55 @@ function RemoveFollowerBycreator(removeFollower) {
 
 function gethomedata() {
   return new Promise((resolve, reject) => {
-    const query = `    
-                  SELECT
-                  c.id,
-                  c.creator_id,
-                  c.media,
-                  c.title AS titles,
-                  c.descriptions,
-                  c.created_at,
-                  u.id AS category_id,
-                  u.title,
-                  cu.creator_name
-                  FROM post_table c
-                  INNER JOIN category u ON c.category_id = u.id
-                  LEFT JOIN creator_users_data cu ON c.creator_id = cu.id
-                  ORDER BY c.created_at DESC
-                  LIMIT 5;
-                  `;
+    const query = `
+      SELECT
+        c.id,
+        c.creator_id,
+        c.media,
+        c.title AS titles,
+        c.descriptions,
+        c.created_at,
+        u.id AS category_id,
+        u.title,
+        cu.creator_name
+      FROM post_table c
+        INNER JOIN category u ON c.category_id = u.id
+        LEFT JOIN creator_users_data cu ON c.creator_id = cu.id
+      ORDER BY c.created_at DESC
+      LIMIT 5;
+    `;
 
-    db.query(query,  (error, results) => {
-        if (error) {
-          console.error("Error executing query:", error);
-          reject(error);
-        } else {
-          const posts = results.map((row) => ({
-            id: row.id,
-            media: row.media,
-            titles: row.titles,
-            descriptions: row.descriptions,
-            creator: {
-              creator_id: row.creator_id,
-              creator_name: row.creator_name,
-            },
+    db.query(query, (error, results) => {
+      if (error) {
+        console.error("Error executing query:", error);
+        reject(error);
+      } else {
+        const posts = results.map((row) => ({
+          id: row.id,
+          media: row.media,
+          titles: row.titles,
+          descriptions: row.descriptions,
+          creator: {
+            creator_id: row.creator_id,
+            creator_name: row.creator_name,
+          },
+          category: {
+            id: row.category_id,
+            title: row.title,
+          },
+          is_active: row.is_active,
+          created_at: moment(row.created_at).format('YYYY-MM-DD HH:mm A'), 
+          updated_at: moment(row.updated_at).format('YYYY-MM-DD HH:mm A'), 
+          is_deleted: row.is_deleted,
+        }));
 
-            category: {
-              id: row.category_id,
-              title: row.title,
-            },
-            is_active: row.is_active,
-            created_at: row.created_at,
-            updated_at: row.updated_at,
-            is_deleted: row.is_deleted,
-          }));
+        resolve(posts);
 
-          resolve(posts);
-
-          console.log("Posts retrieved successfully");
-        }
+        console.log("Posts retrieved successfully");
       }
-    );
+    });
   });
 }
-
-
 
 function getcatdata() {
   return new Promise((resolve, reject) => {
