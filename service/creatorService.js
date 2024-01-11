@@ -1,9 +1,8 @@
-const db = require('../database/database')
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
+const db = require("../database/database");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
-const dotenv = require('dotenv')
-
+const dotenv = require("dotenv");
 
 dotenv.config();
 
@@ -22,21 +21,21 @@ function registerCreator(creatorData) {
       creatorData.ifcs_code,
       creatorData.branch_name,
       creatorData.name_at_bank,
-      creatorData.password
+      creatorData.password,
     ];
 
     db.query(insertSql, values, (error, result) => {
       if (error) {
-        console.error('Error adding creator:', error);
+        console.error("Error adding creator:", error);
         reject(error);
       } else {
         const adminId = result.insertId;
 
         if (adminId > 0) {
-          const successMessage = 'Creator registration successful';
+          const successMessage = "Creator registration successful";
           resolve(successMessage);
         } else {
-          const errorMessage = 'Creator registration failed';
+          const errorMessage = "Creator registration failed";
           reject(errorMessage);
         }
       }
@@ -44,13 +43,8 @@ function registerCreator(creatorData) {
   });
 }
 
-
-
-
 function logincreator(email, password, callback) {
-
-  const query = 'SELECT * FROM creator_users_data WHERE email = ?';
-
+  const query = "SELECT * FROM creator_users_data WHERE email = ?";
 
   db.query(query, [email], async (err, results) => {
     if (err) {
@@ -58,67 +52,62 @@ function logincreator(email, password, callback) {
     }
 
     if (results.length === 0) {
-      return callback(null, { error: 'User not found' });
+      return callback(null, { error: "User not found" });
     }
 
     const user = results[0];
 
     if (user.is_deleted === 1) {
-      return callback(null, { error: 'User not found' });
+      return callback(null, { error: "User not found" });
     }
     if (user.is_approved !== 1) {
-      return callback(null, { error: 'You are not approved at this moment' });
+      return callback(null, { error: "You are not approved at this moment" });
     }
-
 
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      return callback(null, { error: 'Invalid password' });
+      return callback(null, { error: "Invalid password" });
     }
 
     const secretKey = process.env.JWT_SECRET;
-    const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, secretKey);
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      secretKey
+    );
 
     return callback(null, {
       data: {
-
         id: user.id,
         email: user.username,
         creator_name: user.creator_name,
         phone_number: user.phone_number,
         role: user.role,
         token: token,
-
-      }
+      },
     });
   });
 }
-
 
 function commentadd(commentAdd) {
   return new Promise((resolve, reject) => {
     const insertSql = `INSERT INTO comment_table(post_id,user_id,comment) 
                            VALUES (?,?,?)`;
 
-    const values = [
-      commentAdd.post_id,
-      commentAdd.user_id,
-      commentAdd.comment
-    ];
+    const values = [commentAdd.post_id, commentAdd.user_id, commentAdd.comment];
 
     db.query(insertSql, values, (error, result) => {
       if (error) {
-        console.error('Error adding comment:', error);
+        console.error("Error adding comment:", error);
         reject(error);
       } else {
         const adminId = result.insertId;
 
         if (adminId > 0) {
-          const successMessage = 'add comment successful';
+          const successMessage = "add comment successful";
           resolve(successMessage);
         } else {
-          const errorMessage = 'add  comment failed';
+          const errorMessage = "add  comment failed";
           reject(errorMessage);
         }
       }
@@ -128,20 +117,18 @@ function commentadd(commentAdd) {
 
 const checkUserExists = (userId) => {
   return new Promise((resolve, reject) => {
-    const checkUserSql = 'SELECT * FROM user_register WHERE id = ?';
+    const checkUserSql = "SELECT * FROM user_register WHERE id = ?";
 
     db.query(checkUserSql, [userId], (error, result) => {
       if (error) {
-        console.error('Error checking user existence:', error);
+        console.error("Error checking user existence:", error);
         reject(error);
       } else {
-
         resolve(result.length > 0);
       }
     });
   });
 };
-
 
 function searchKeyPost(postTitle) {
   return new Promise((resolve, reject) => {
@@ -166,7 +153,7 @@ function searchKeyPost(postTitle) {
 
     db.query(query, [postTitle], (error, results) => {
       if (error) {
-        console.error('Error executing query:', error);
+        console.error("Error executing query:", error);
         reject(error);
       } else {
         const posts = results.map((row) => ({
@@ -186,13 +173,11 @@ function searchKeyPost(postTitle) {
 
         resolve(posts);
 
-        console.log('Posts retrieved successfully');
+        console.log("Posts retrieved successfully");
       }
     });
   });
 }
-
-
 
 function getallpost(offset, pageSize) {
   return new Promise((resolve, reject) => {
@@ -213,7 +198,7 @@ function getallpost(offset, pageSize) {
 
     db.query(query, [offset, parseInt(pageSize, 10)], (error, results) => {
       if (error) {
-        console.error('Error executing query:', error);
+        console.error("Error executing query:", error);
         reject(error);
       } else {
         const posts = results.map((row) => ({
@@ -237,7 +222,7 @@ function getallpost(offset, pageSize) {
 
         resolve(posts);
 
-        console.log('Posts retrieved successfully');
+        console.log("Posts retrieved successfully");
       }
     });
   });
@@ -245,11 +230,11 @@ function getallpost(offset, pageSize) {
 
 function getTotalPostCount() {
   return new Promise((resolve, reject) => {
-    const countQuery = 'SELECT COUNT(*) AS totalCount FROM post_table;';
+    const countQuery = "SELECT COUNT(*) AS totalCount FROM post_table;";
 
     db.query(countQuery, (error, results) => {
       if (error) {
-        console.error('Error executing count query:', error);
+        console.error("Error executing count query:", error);
         reject(error);
       } else {
         const totalCount = results[0].totalCount;
@@ -259,50 +244,43 @@ function getTotalPostCount() {
   });
 }
 
-
 const updatestatus = (is_approved, userId, callback) => {
-  const updateQuery = 'UPDATE creator_users_data SET is_approved	 = ? WHERE id = ?';
+  const updateQuery =
+    "UPDATE creator_users_data SET is_approved	 = ? WHERE id = ?";
 
   db.query(updateQuery, [is_approved, userId], (error, result) => {
     if (error) {
-      console.error('Error while update creator status:', error);
+      console.error("Error while update creator status:", error);
       return callback(error, null);
     }
 
     if (result.affectedRows === 0) {
-      return callback(null, { error: 'creator not found' });
+      return callback(null, { error: "creator not found" });
     }
 
-    return callback(null, { message: 'creator status updated successfully' });
+    return callback(null, { message: "creator status updated successfully" });
   });
 };
-
-
-
-
 
 function likeadd(likeAdd) {
   return new Promise((resolve, reject) => {
     const insertSql = `INSERT INTO likes_table(post_id,user_id) 
                          VALUES (?,?,?)`;
 
-    const values = [
-      likeAdd.post_id,
-      likeAdd.user_id,
-    ];
+    const values = [likeAdd.post_id, likeAdd.user_id];
 
     db.query(insertSql, values, (error, result) => {
       if (error) {
-        console.error('Error adding likes:', error);
+        console.error("Error adding likes:", error);
         reject(error);
       } else {
         const adminId = result.insertId;
 
         if (adminId > 0) {
-          const successMessage = 'add like successful';
+          const successMessage = "add like successful";
           resolve(successMessage);
         } else {
-          const errorMessage = 'add  like failed';
+          const errorMessage = "add  like failed";
           reject(errorMessage);
         }
       }
@@ -326,7 +304,7 @@ function getallcommentbypostid(postid) {
 
     db.query(query, postid, (error, results) => {
       if (error) {
-        console.error('Error executing query:', error);
+        console.error("Error executing query:", error);
         reject(error);
       } else {
         const comments = results.map((row) => ({
@@ -342,36 +320,31 @@ function getallcommentbypostid(postid) {
 
         resolve(comments);
 
-        console.log('All comments retrieved successfully');
+        console.log("All comments retrieved successfully");
       }
     });
   });
 }
-
-
 
 function Addfoloowr(addFollower) {
   return new Promise((resolve, reject) => {
     const insertSql = `INSERT INTO follower_table(creator_id,user_id) 
                            VALUES (?,?)`;
 
-    const values = [
-      addFollower.creator_id,
-      addFollower.user_id,
-    ];
+    const values = [addFollower.creator_id, addFollower.user_id];
 
     db.query(insertSql, values, (error, result) => {
       if (error) {
-        console.error('Error adding follower:', error);
+        console.error("Error adding follower:", error);
         reject(error);
       } else {
         const adminId = result.insertId;
 
         if (adminId > 0) {
-          const successMessage = 'add follower successful';
+          const successMessage = "add follower successful";
           resolve(successMessage);
         } else {
-          const errorMessage = 'add  follower failed';
+          const errorMessage = "add  follower failed";
           reject(errorMessage);
         }
       }
@@ -393,7 +366,7 @@ function getallFollowr(creatorId) {
 
     db.query(query, [creatorId], (error, results) => {
       if (error) {
-        console.error('Error executing query:', error);
+        console.error("Error executing query:", error);
         reject(error);
       } else {
         const follower = results.map((row) => ({
@@ -401,73 +374,63 @@ function getallFollowr(creatorId) {
           user: {
             id: row.user_id,
             name: row.name,
-            image: row.image
+            image: row.image,
           },
         }));
 
         resolve(follower);
 
-        console.log('All follower retrieved successfully');
+        console.log("All follower retrieved successfully");
       }
     });
   });
 }
-
 
 function RemoveFollower(removeFollower) {
   return new Promise((resolve, reject) => {
     const deleteSql = `DELETE FROM follower_table
                        WHERE creator_id = ? AND user_id = ?`;
 
-    const values = [
-      removeFollower.creator_id,
-      removeFollower.user_id,
-    ];
+    const values = [removeFollower.creator_id, removeFollower.user_id];
 
     db.query(deleteSql, values, (error, result) => {
       if (error) {
-        console.error('Error removing follower:', error);
+        console.error("Error removing follower:", error);
         reject(error);
       } else {
         if (result.affectedRows > 0) {
-          resolve(true); 
+          resolve(true);
         } else {
-          resolve(false); 
+          resolve(false);
         }
       }
     });
   });
 }
-
 
 function RemoveLIke(removeLike) {
   return new Promise((resolve, reject) => {
     const deleteSql = `DELETE FROM likes_table
                        WHERE post_id = ? AND user_id = ?`;
 
-    const values = [
-      removeLike.creator_id,
-      removeLike.user_id,
-    ];
+    const values = [removeLike.creator_id, removeLike.user_id];
 
     db.query(deleteSql, values, (error, result) => {
       if (error) {
-        console.error('Error removing likes:', error);
+        console.error("Error removing likes:", error);
         reject(error);
       } else {
         if (result.affectedRows > 0) {
-          resolve(true); 
+          resolve(true);
         } else {
-          resolve(false); 
+          resolve(false);
         }
       }
     });
   });
 }
 
-
-
-function getallpostbyId(userId,offset, pageSize) {
+function getallpostbyId(userId, offset, pageSize) {
   return new Promise((resolve, reject) => {
     const query = `
         SELECT
@@ -481,40 +444,44 @@ function getallpostbyId(userId,offset, pageSize) {
           cu.creator_name
         FROM post_table c
         INNER JOIN category u ON c.category_id = u.id
-        LEFT JOIN  creator_users_data cu ON c.creator_id = cu.id
+        LEFT JOIN  creator_users_data cu ON c.creator_id = cu.id  
         WHERE c.creator_id = ? AND c.is_deleted = 0
         LIMIT ?, ?;`;
 
-    db.query(query, [userId,offset, parseInt(pageSize, 10)], (error, results) => {
-      if (error) {
-        console.error('Error executing query:', error);
-        reject(error);
-      } else {
-        const posts = results.map((row) => ({
-          id: row.id,
-          media: row.media,
-          titles: row.titles,
-          descriptions: row.descriptions,
-          creator: {
-            creator_id: row.creator_id,
-            creator_name: row.creator_name,
-          },
-       
-          category: {
-            id: row.category_id,
-            title: row.title,
-          },
-          is_active: row.is_active,
-          create_date: row.create_date,
-          update_date: row.update_date,
-          is_deleted: row.is_deleted,
-        }));
+    db.query(
+      query,
+      [userId, offset, parseInt(pageSize, 10)],
+      (error, results) => {
+        if (error) {
+          console.error("Error executing query:", error);
+          reject(error);
+        } else {
+          const posts = results.map((row) => ({
+            id: row.id,
+            media: row.media,
+            titles: row.titles,
+            descriptions: row.descriptions,
+            creator: {
+              creator_id: row.creator_id,
+              creator_name: row.creator_name,
+            },
 
-        resolve(posts);
+            category: {
+              id: row.category_id,
+              title: row.title,
+            },
+            is_active: row.is_active,
+            create_date: row.create_date,
+            update_date: row.update_date,
+            is_deleted: row.is_deleted,
+          }));
 
-        console.log('Posts retrieved successfully');
+          resolve(posts);
+
+          console.log("Posts retrieved successfully");
+        }
       }
-    });
+    );
   });
 }
 
@@ -541,7 +508,7 @@ function searchKeyPosttitle(postTitle) {
 
     db.query(query, [postTitle], (error, results) => {
       if (error) {
-        console.error('Error executing query:', error);
+        console.error("Error executing query:", error);
         reject(error);
       } else {
         const posts = results.map((row) => ({
@@ -561,12 +528,11 @@ function searchKeyPosttitle(postTitle) {
 
         resolve(posts);
 
-        console.log('Posts retrieved successfully');
+        console.log("Posts retrieved successfully");
       }
     });
   });
 }
-
 
 function addPost(postData) {
   return new Promise((resolve, reject) => {
@@ -578,21 +544,21 @@ function addPost(postData) {
       postData.media,
       postData.title,
       postData.descriptions,
-      postData.category_id
+      postData.category_id,
     ];
 
     db.query(insertSql, values, (error, result) => {
       if (error) {
-        console.error('Error adding creator:', error);
+        console.error("Error adding creator:", error);
         reject(error);
       } else {
         const adminId = result.insertId;
 
         if (adminId > 0) {
-          const successMessage = 'add post  successful';
+          const successMessage = "add post  successful";
           resolve(successMessage);
         } else {
-          const errorMessage = 'add post failed';
+          const errorMessage = "add post failed";
           reject(errorMessage);
         }
       }
@@ -600,44 +566,38 @@ function addPost(postData) {
   });
 }
 
-
-
 const checkid = (userId) => {
   return new Promise((resolve, reject) => {
-    const checkUserSql = 'SELECT * FROM  creator_users_data WHERE id = ?';
+    const checkUserSql = "SELECT * FROM  creator_users_data WHERE id = ?";
 
     db.query(checkUserSql, [userId], (error, result) => {
       if (error) {
-        console.error('Error checking user existence:', error);
+        console.error("Error checking user existence:", error);
         reject(error);
       } else {
-        resolve(result.length > 0); 
-        console.log(result.length)
+        resolve(result.length > 0);
+        console.log(result.length);
       }
     });
   });
 };
 
-
-
 const updatepsotdlt = (is_deleted, userId, callback) => {
-  const updateQuery = 'UPDATE  post_table SET is_deleted	 = ? WHERE id = ?';
+  const updateQuery = "UPDATE  post_table SET is_deleted	 = ? WHERE id = ?";
 
   db.query(updateQuery, [is_deleted, userId], (error, result) => {
     if (error) {
-      console.error('Error while update creator status:', error);
+      console.error("Error while update creator status:", error);
       return callback(error, null);
     }
 
     if (result.affectedRows === 0) {
-      return callback(null, { error: 'creator not found' });
+      return callback(null, { error: "creator not found" });
     }
 
-    return callback(null, { message: 'creator status updated successfully' });
+    return callback(null, { message: "creator status updated successfully" });
   });
 };
-
-
 
 function getdataown(userId) {
   return new Promise((resolve, reject) => {
@@ -646,39 +606,200 @@ function getdataown(userId) {
       FROM creator_users_data WHERE id =? AND is_deleted = 0
     `;
 
-    db.query(query,userId, (error, results) => {
+    db.query(query, userId, (error, results) => {
       if (error) {
-        console.error('Error executing query:', error);
+        console.error("Error executing query:", error);
         reject(error);
-      } else  {
-        resolve(results)
-      };
-    })
-  })
+      } else {
+        resolve(results);
+      }
+    });
+  });
 }
-
-
 
 function RemoveFollowerBycreator(removeFollower) {
   return new Promise((resolve, reject) => {
     const deleteSql = `DELETE FROM follower_table
                        WHERE creator_id = ? AND user_id = ?`;
-                       
-    const values = [
-      removeFollower.creator_id,
-      removeFollower.user_id,
-    ];
+
+    const values = [removeFollower.creator_id, removeFollower.user_id];
 
     db.query(deleteSql, values, (error, result) => {
       if (error) {
-        console.error('Error removing follower:', error);
+        console.error("Error removing follower:", error);
         reject(error);
       } else {
         if (result.affectedRows > 0) {
-          resolve(true); 
+          resolve(true);
         } else {
-          resolve(false); 
+          resolve(false);
         }
+      }
+    });
+  });
+}
+
+function gethomedata() {
+  return new Promise((resolve, reject) => {
+    const query = `    
+                  SELECT
+                  c.id,
+                  c.creator_id,
+                  c.media,
+                  c.title AS titles,
+                  c.descriptions,
+                  c.created_at,
+                  u.id AS category_id,
+                  u.title,
+                  cu.creator_name
+                  FROM post_table c
+                  INNER JOIN category u ON c.category_id = u.id
+                  LEFT JOIN creator_users_data cu ON c.creator_id = cu.id
+                  ORDER BY c.created_at DESC
+                  LIMIT 5;
+                  `;
+
+    db.query(query,  (error, results) => {
+        if (error) {
+          console.error("Error executing query:", error);
+          reject(error);
+        } else {
+          const posts = results.map((row) => ({
+            id: row.id,
+            media: row.media,
+            titles: row.titles,
+            descriptions: row.descriptions,
+            creator: {
+              creator_id: row.creator_id,
+              creator_name: row.creator_name,
+            },
+
+            category: {
+              id: row.category_id,
+              title: row.title,
+            },
+            is_active: row.is_active,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+            is_deleted: row.is_deleted,
+          }));
+
+          resolve(posts);
+
+          console.log("Posts retrieved successfully");
+        }
+      }
+    );
+  });
+}
+
+
+
+function getcatdata() {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT
+        c.id,
+        c.creator_id,
+        c.media,
+        c.title AS titles,
+        c.descriptions,
+        c.created_at,
+        c.category_id,
+        u.id AS category_id,
+        u.title,
+        cu.creator_name
+      FROM post_table c
+        INNER JOIN category u ON c.category_id = u.id
+        LEFT JOIN creator_users_data cu ON c.creator_id = cu.id
+      WHERE c.category_id = 4
+      ORDER BY c.created_at DESC
+      LIMIT 5;
+    `;
+
+    db.query(query, (error, results) => {
+      if (error) {
+        console.error("Error executing query:", error);
+        reject(error);
+      } else {
+        const posts = results.map((row) => ({
+          id: row.id,
+          media: row.media,
+          titles: row.titles,
+          descriptions: row.descriptions,
+          creator: {
+            creator_id: row.creator_id,
+            creator_name: row.creator_name,
+          },
+          category: {
+            id: row.category_id,
+            title: row.title,
+          },
+          is_active: row.is_active,
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+          is_deleted: row.is_deleted,
+        }));
+
+        resolve(posts);
+
+        console.log("Posts retrieved successfully");
+      }
+    });
+  });
+}
+
+
+
+function getbusisnessnews() {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT
+        c.id,
+        c.creator_id,
+        c.media,
+        c.title AS titles,
+        c.descriptions,
+        c.created_at,
+        c.category_id,
+        u.id AS category_id,
+        u.title,
+        cu.creator_name
+      FROM post_table c
+        INNER JOIN category u ON c.category_id = u.id
+        LEFT JOIN creator_users_data cu ON c.creator_id = cu.id
+      WHERE c.category_id = 7
+      ORDER BY c.created_at DESC
+      LIMIT 5;
+    `;
+
+    db.query(query, (error, results) => {
+      if (error) {
+        console.error("Error executing query:", error);
+        reject(error);
+      } else {
+        const posts = results.map((row) => ({
+          id: row.id,
+          media: row.media,
+          titles: row.titles,
+          descriptions: row.descriptions,
+          creator: {
+            creator_id: row.creator_id,
+            creator_name: row.creator_name,
+          },
+          category: {
+            id: row.category_id,
+            title: row.title,
+          },
+          is_active: row.is_active,
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+          is_deleted: row.is_deleted,
+        }));
+
+        resolve(posts);
+
+        console.log("Posts retrieved successfully");
       }
     });
   });
@@ -705,5 +826,8 @@ module.exports = {
   checkid,
   updatepsotdlt,
   getdataown,
-  RemoveFollowerBycreator
-}
+  RemoveFollowerBycreator,
+  gethomedata,
+  getcatdata,
+  getbusisnessnews
+};

@@ -42,5 +42,6 @@ router.get('/gedataown', authenticateToken, creatorCOntroller.getdataownclient)
 
 router.post('/unfollowbyCretor',validateUnfollowbyCreator,authenticateToken, creatorCOntroller.removefolowerbycreator)
 
+router.get('/getposthome' , creatorCOntroller.gethomedata)
 
 module.exports = router;
