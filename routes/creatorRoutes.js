@@ -23,7 +23,7 @@ router.post('/commentadd' ,validatecomment, authenticateToken, creatorCOntroller
 
 router.post('/likeadd',Validatelike, authenticateToken, creatorCOntroller.likePost)
 
-router.get('/comment/:id',authenticateToken, creatorCOntroller.getcommentbyPostid)
+router.get('/comment/:id', creatorCOntroller.getcommentbyPostid)
 
 router.post('/addfollower',Validatefollower, authenticateToken, creatorCOntroller.addFollower)
 
